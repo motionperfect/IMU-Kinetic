@@ -17,18 +17,7 @@
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/*----------------------------------------------------------------------------*/
-/* Configure GPIO                                                             */
-/*----------------------------------------------------------------------------*/
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
 
 /** Configure pins as 
         * Analog 
@@ -36,8 +25,7 @@
         * Output
         * EVENT_OUT
         * EXTI
-        * Free pins are configured automatically as Analog (this feature is enabled through 
-        * the Code Generation settings)
+        * Free pins are configured automatically as Analog
 */
 void MX_GPIO_Init (void)
 {
@@ -212,9 +200,5 @@ void MX_GPIO_Init (void)
   HAL_NVIC_EnableIRQ (EXTI15_10_IRQn);
 
 }
-
-/* USER CODE BEGIN 2 */
-
-/* USER CODE END 2 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

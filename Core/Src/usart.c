@@ -17,16 +17,9 @@
   ******************************************************************************
   */
 
-/* Includes ------------------------------------------------------------------*/
 #include "usart.h"
 
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
 UART_HandleTypeDef huart1;
-
-/* USART1 init function */
 
 void MX_USART1_UART_Init (void)
 {
@@ -43,7 +36,7 @@ void MX_USART1_UART_Init (void)
   huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   if (HAL_UART_Init (&huart1) != HAL_OK)
 	{
-	  Error_Handler ();
+	  HAL_Error_Handler ();
 	}
 
 }
@@ -54,9 +47,6 @@ void HAL_UART_MspInit (UART_HandleTypeDef *uartHandle)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if (uartHandle->Instance == USART1)
 	{
-	  /* USER CODE BEGIN USART1_MspInit 0 */
-
-	  /* USER CODE END USART1_MspInit 0 */
 	  /* USART1 clock enable */
 	  __HAL_RCC_USART1_CLK_ENABLE();
 
@@ -71,10 +61,6 @@ void HAL_UART_MspInit (UART_HandleTypeDef *uartHandle)
 	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	  GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
 	  HAL_GPIO_Init (GPIOB, &GPIO_InitStruct);
-
-	  /* USER CODE BEGIN USART1_MspInit 1 */
-
-	  /* USER CODE END USART1_MspInit 1 */
 	}
 }
 
@@ -83,9 +69,6 @@ void HAL_UART_MspDeInit (UART_HandleTypeDef *uartHandle)
 
   if (uartHandle->Instance == USART1)
 	{
-	  /* USER CODE BEGIN USART1_MspDeInit 0 */
-
-	  /* USER CODE END USART1_MspDeInit 0 */
 	  /* Peripheral clock disable */
 	  __HAL_RCC_USART1_CLK_DISABLE();
 
@@ -94,15 +77,7 @@ void HAL_UART_MspDeInit (UART_HandleTypeDef *uartHandle)
 	  PB7     ------> USART1_RX
 	  */
 	  HAL_GPIO_DeInit (GPIOB, ST_LINK_UART1_TX_Pin | ST_LINK_UART1_RX_Pin);
-
-	  /* USER CODE BEGIN USART1_MspDeInit 1 */
-
-	  /* USER CODE END USART1_MspDeInit 1 */
 	}
 }
-
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

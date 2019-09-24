@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "error_handler.h"
 #include "stm32l4xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -51,7 +52,7 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler (void);
+
 
 /* USER CODE BEGIN EFP */
 
