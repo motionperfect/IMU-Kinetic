@@ -16,13 +16,9 @@
   ******************************************************************************
   */
 
-#include "FreeRTOS.h"
-#include "main.h"
 #include "cmsis_os.h"
 
-osThreadId_t defaultTaskHandle;
-
-void StartDefaultTask (void *argument);
+#include "Tasks/accelerometer.h"
 
 void MX_FREERTOS_Init (void); /* (MISRA C 2004 rule 8.1) */
 
@@ -35,26 +31,7 @@ void MX_FREERTOS_Init (void)
 {
   osKernelInitialize ();
 
-  const osThreadAttr_t defaultTask_attributes = {
-	  .name = "defaultTask",
-	  .priority = (osPriority_t)osPriorityNormal,
-	  .stack_size = 256
-  };
-  defaultTaskHandle = osThreadNew (StartDefaultTask, NULL, &defaultTask_attributes);
-}
-
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used 
-  * @retval None
-  */
-void StartDefaultTask (void *argument)
-{
-  for (;;)
-	{
-	  HAL_GPIO_TogglePin (LED2_GPIO_Port, LED2_Pin);
-	  osDelay (1000);
-	}
+  initAccelerometerTask ();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
