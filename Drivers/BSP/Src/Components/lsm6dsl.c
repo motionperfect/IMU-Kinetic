@@ -19,7 +19,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "lsm6dsl.h"
+#include "Components/lsm6dsl.h"
 
 /** @addtogroup BSP
   * @{
