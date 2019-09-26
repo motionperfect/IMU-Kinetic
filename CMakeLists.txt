@@ -7,6 +7,7 @@ project(MotionPerfect C ASM)
 # C sources
 file(GLOB_RECURSE C_SOURCES "Middlewares/Third_Party/FreeRTOS/Source/*.c"
         "Drivers/STM32L4xx_HAL_Driver/Src/*.c"
+        "Drivers/BSP/Src/*.c"
         "Core/Src/*.c")
 
 # ASM sources
@@ -21,6 +22,7 @@ add_definitions(-DUSE_HAL_DRIVER -DSTM32L475xx)
 
 # C includes
 include_directories(Core/Inc)
+include_directories(Drivers/BSP/Inc)
 include_directories(Drivers/STM32L4xx_HAL_Driver/Inc)
 include_directories(Drivers/STM32L4xx_HAL_Driver/Inc/Legacy)
 include_directories(Middlewares/Third_Party/FreeRTOS/Source/include)
