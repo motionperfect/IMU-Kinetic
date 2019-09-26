@@ -7,13 +7,18 @@
 */
 
 #include "error_handler.h"
+#include "FreeRTOS.h"
 #include "task.h"
 #include "gpio.h"
 #include "cmsis_os.h"
 
+#include <stdio.h>
+#include <inttypes.h>
+
 void
 vApplicationStackOverflowHook (TaskHandle_t xTask, signed char *pcTaskName)
 {
+  configPRINTF (("stack overflow on task: %s\n", pcTaskName));
   HAL_Error_Handler ();
 }
 
@@ -44,10 +49,9 @@ void HAL_Error_Handler (void)
   */
 void assert_failed (char *file, uint32_t line)
 {
-  /*
-   * Implementation to report the file name and line number
-   * ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line)
-   */
+  const char error[] = "Wrong parameters value: file %s on line %" PRIu32 "\r\n";
+
+  configPRINTF ((error, file, line));
   HAL_Error_Handler ();
 }
 #endif /* USE_FULL_ASSERT */

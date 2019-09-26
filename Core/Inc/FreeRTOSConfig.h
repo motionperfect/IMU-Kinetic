@@ -155,4 +155,9 @@ extern uint32_t SystemCoreClock;
  */
 #define xPortSysTickHandler SysTick_Handler
 
+/**
+ * User defined
+ */
+#define configPRINTF(X)    printf X
+
 #endif /* FREERTOS_CONFIG_H */

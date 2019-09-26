@@ -24,33 +24,38 @@
 void SystemClock_Config (void);
 void MX_FREERTOS_Init (void);
 
+int __io_putchar (int ch)
+{
+  HAL_UART_Transmit (&huart1, (uint8_t *)&ch, 1, portMAX_DELAY);
+  return ch;
+}
+
 /**
   * @brief  The application entry point.
   * @retval int
   */
 int main (void)
 {
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init ();
 
-  /* Configure the system clock */
   SystemClock_Config ();
 
-  /* Initialize all configured peripherals */
   MX_GPIO_Init ();
   MX_USART1_UART_Init ();
 
-  /* Call init function for freertos objects (in freertos.c) */
+  HAL_GPIO_TogglePin (
+	  LED3_WIFI__LED4_BLE_GPIO_Port,
+	  LED3_WIFI__LED4_BLE_Pin
+  );
+
   MX_FREERTOS_Init ();
 
-  /* Start scheduler */
   osKernelStart ();
 
-
-  /* We should never get here as control is now taken by the scheduler */
-  for (;;)
-	{
-	}
+  /*
+   * We should never get here as control is now taken by the scheduler
+   */
+  for (;;);
 }
 
 /**
@@ -63,14 +68,16 @@ void SystemClock_Config (void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /** Initializes the CPU, AHB and APB busses clocks 
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  /*
+   * Initializes the CPU, AHB and APB busses clocks
+   */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 40;
+  RCC_OscInitStruct.PLL.PLLN = 20;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV4;
@@ -78,8 +85,10 @@ void SystemClock_Config (void)
 	{
 	  HAL_Error_Handler ();
 	}
-  /** Initializes the CPU, AHB and APB busses clocks 
-  */
+
+  /*
+   * Initializes the CPU, AHB and APB busses clocks
+   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
 								| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
@@ -97,11 +106,10 @@ void SystemClock_Config (void)
 	{
 	  HAL_Error_Handler ();
 	}
-  /** Enables the Clock Security System 
-  */
-  HAL_RCC_EnableCSS ();
-  /** Configure the main internal regulator output voltage 
-  */
+
+  /*
+   * Configure the main internal regulator output voltage
+   */
   if (HAL_PWREx_ControlVoltageScaling (PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
 	{
 	  HAL_Error_Handler ();
