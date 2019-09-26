@@ -38,7 +38,7 @@ void MX_FREERTOS_Init (void)
   const osThreadAttr_t defaultTask_attributes = {
 	  .name = "defaultTask",
 	  .priority = (osPriority_t)osPriorityNormal,
-	  .stack_size = 128
+	  .stack_size = 256
   };
   defaultTaskHandle = osThreadNew (StartDefaultTask, NULL, &defaultTask_attributes);
 }
@@ -52,7 +52,7 @@ void StartDefaultTask (void *argument)
 {
   for (;;)
 	{
-	  HAL_GPIO_TogglePin (LED3_WIFI__LED4_BLE_GPIO_Port, LED3_WIFI__LED4_BLE_Pin);
+	  HAL_GPIO_TogglePin (LED2_GPIO_Port, LED2_Pin);
 	  osDelay (1000);
 	}
 }
