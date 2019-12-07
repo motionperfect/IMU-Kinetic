@@ -66,7 +66,7 @@ uint8_t BSP_GYRO_Init (void)
 
 	  /* Configure Mems : data rate, power mode, full scale and axes */
 	  LSM6DSL_InitStructure.Power_Mode = 0;
-	  LSM6DSL_InitStructure.Output_DataRate = LSM6DSL_ODR_52Hz;
+	  LSM6DSL_InitStructure.Output_DataRate = LSM6DSL_ODR_208Hz;
 	  LSM6DSL_InitStructure.Axes_Enable = 0;
 	  LSM6DSL_InitStructure.Band_Width = 0;
 	  LSM6DSL_InitStructure.BlockData_Update = LSM6DSL_BDU_BLOCK_UPDATE;
