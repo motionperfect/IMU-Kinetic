@@ -5,9 +5,9 @@
 ** Copyright (c) 2019 by Julien Sarriot
 ** All rights reserved.
 */
-#ifndef _ERROR_HANDLER_H_
-#define _ERROR_HANDLER_H_
+#ifndef _ERRORHANDLER_H_
+#define _ERRORHANDLER_H_
 
-void HAL_Error_Handler (void);
+void vErrorHandler (void);
 
-#endif //_ERROR_HANDLER_H_
+#endif //_ERRORHANDLER_H_

@@ -19,7 +19,7 @@ if (CMAKE_BUILD_TYPE EQUAL "MinSizeRel")
 elseif (CMAKE_BUILD_TYPE EQUAL "Release")
     set(OPT "-O3")
 else ()
-    set(OPT "-g")
+    set(OPT "-Og")
 endif ()
 
 #######################################
