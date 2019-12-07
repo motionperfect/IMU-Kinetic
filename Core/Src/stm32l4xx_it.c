@@ -16,7 +16,7 @@
   ******************************************************************************
   */
 
-#include "main.h"
+#include "Main.h"
 #include "stm32l4xx_it.h"
 #include "FreeRTOS.h"
 #include "task.h"

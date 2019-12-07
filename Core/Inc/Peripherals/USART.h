@@ -23,11 +23,11 @@
 extern "C" {
 #endif
 
-#include "main.h"
+#include "Main.h"
 
-extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef xConsoleUART;
 
-void MX_USART1_UART_Init (void);
+void vConsoleUARTInit (void);
 
 #ifdef __cplusplus
 }

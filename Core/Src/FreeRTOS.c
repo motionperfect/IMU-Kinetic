@@ -15,23 +15,31 @@
   *
   ******************************************************************************
   */
-
 #include "cmsis_os.h"
 
-#include "Tasks/accelerometer.h"
+#include "FreeRTOSTasksConfig.h"
+#include "Utils/Logger.h"
 
-void MX_FREERTOS_Init (void); /* (MISRA C 2004 rule 8.1) */
+#include "Tasks/Measurement.h"
+#include "Tasks/Logging.h"
 
 /**
   * @brief  FreeRTOS initialization
   * @param  None
   * @retval None
   */
-void MX_FREERTOS_Init (void)
+void vFreeRTOSInit (void)
 {
   osKernelInitialize ();
 
-  initAccelerometerTask ();
+  vLoggingTaskInit (configLOGGING_TASK_STACK_SIZE,
+					configLOGGING_TASK_PRIORITY,
+					configLOGGING_MESSAGE_QUEUE_LENGTH);
+
+  vMeasurementTaskInit (configMEASUREMENT_TASK_STACK_SIZE,
+						configMEASUREMENT_TASK_PRIORITY);
+
+  configPRINT_STRING ("Info: µKernel successfully initialized.\n");
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

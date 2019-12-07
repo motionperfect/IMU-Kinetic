@@ -1568,8 +1568,8 @@ HAL_LIN_Init (UART_HandleTypeDef *huart, uint32_t BreakDetectLength);
 HAL_StatusTypeDef
 HAL_MultiProcessor_Init (UART_HandleTypeDef *huart, uint8_t Address, uint32_t WakeUpMethod);
 HAL_StatusTypeDef HAL_UART_DeInit (UART_HandleTypeDef *huart);
-void HAL_UART_MspInit (UART_HandleTypeDef *huart);
-void HAL_UART_MspDeInit (UART_HandleTypeDef *huart);
+void HAL_UART_MspInit (UART_HandleTypeDef *pxUARTHandle);
+void HAL_UART_MspDeInit (UART_HandleTypeDef *pxUARTHandle);
 
 /* Callbacks Register/UnRegister functions  ***********************************/
 #if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
