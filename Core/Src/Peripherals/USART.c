@@ -16,36 +16,35 @@
   *
   ******************************************************************************
   */
+#include "Peripherals/USART.h"
 
-#include "usart.h"
+UART_HandleTypeDef xConsoleUART;
 
-UART_HandleTypeDef huart1;
-
-void MX_USART1_UART_Init (void)
+void vConsoleUARTInit (void)
 {
 
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init (&huart1) != HAL_OK)
+  xConsoleUART.Instance = USART1;
+  xConsoleUART.Init.BaudRate = 115200;
+  xConsoleUART.Init.WordLength = UART_WORDLENGTH_8B;
+  xConsoleUART.Init.StopBits = UART_STOPBITS_1;
+  xConsoleUART.Init.Parity = UART_PARITY_NONE;
+  xConsoleUART.Init.Mode = UART_MODE_TX_RX;
+  xConsoleUART.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  xConsoleUART.Init.OverSampling = UART_OVERSAMPLING_16;
+  xConsoleUART.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  xConsoleUART.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init (&xConsoleUART) != HAL_OK)
 	{
-	  HAL_Error_Handler ();
+	  vErrorHandler ();
 	}
 
 }
 
-void HAL_UART_MspInit (UART_HandleTypeDef *uartHandle)
+void HAL_UART_MspInit (UART_HandleTypeDef *pxUARTHandle)
 {
 
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if (uartHandle->Instance == USART1)
+  GPIO_InitTypeDef xGPIOInitStruct = {0};
+  if (pxUARTHandle->Instance == USART1)
 	{
 	  /* USART1 clock enable */
 	  __HAL_RCC_USART1_CLK_ENABLE();
@@ -55,19 +54,19 @@ void HAL_UART_MspInit (UART_HandleTypeDef *uartHandle)
 	  PB6     ------> USART1_TX
 	  PB7     ------> USART1_RX
 	  */
-	  GPIO_InitStruct.Pin = ST_LINK_UART1_TX_Pin | ST_LINK_UART1_RX_Pin;
-	  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	  GPIO_InitStruct.Pull = GPIO_NOPULL;
-	  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-	  GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
-	  HAL_GPIO_Init (GPIOB, &GPIO_InitStruct);
+	  xGPIOInitStruct.Pin = ST_LINK_UART1_TX_Pin | ST_LINK_UART1_RX_Pin;
+	  xGPIOInitStruct.Mode = GPIO_MODE_AF_PP;
+	  xGPIOInitStruct.Pull = GPIO_NOPULL;
+	  xGPIOInitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+	  xGPIOInitStruct.Alternate = GPIO_AF7_USART1;
+	  HAL_GPIO_Init (GPIOB, &xGPIOInitStruct);
 	}
 }
 
-void HAL_UART_MspDeInit (UART_HandleTypeDef *uartHandle)
+void HAL_UART_MspDeInit (UART_HandleTypeDef *pxUARTHandle)
 {
 
-  if (uartHandle->Instance == USART1)
+  if (pxUARTHandle->Instance == USART1)
 	{
 	  /* Peripheral clock disable */
 	  __HAL_RCC_USART1_CLK_DISABLE();

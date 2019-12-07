@@ -23,9 +23,9 @@
 extern "C" {
 #endif
 
-#include "main.h"
+#include "Main.h"
 
-void MX_GPIO_Init (void);
+void vGPIOInit (void);
 
 #ifdef __cplusplus
 }
