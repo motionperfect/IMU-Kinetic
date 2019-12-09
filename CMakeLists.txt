@@ -5,8 +5,9 @@ project(MotionPerfect C ASM)
 # source
 ######################################
 # C sources
-file(GLOB_RECURSE C_SOURCES "Middlewares/Third_Party/FreeRTOS/Source/*.c"
+file(GLOB_RECURSE C_SOURCES "Middlewares/Third_Party/FreeRTOS/*.c"
         "Middlewares/Third_Party/Printf/*.c"
+        "Drivers/CMSIS_5/CMSIS/RTOS2/FreeRTOS/Source/*.c"
         "Drivers/STM32L4xx_HAL_Driver/Src/*.c"
         "Drivers/BSP/Src/*.c"
         "Core/Src/*.c")
@@ -28,10 +29,11 @@ include_directories(Drivers/STM32L4xx_HAL_Driver/Inc)
 include_directories(Drivers/STM32L4xx_HAL_Driver/Inc/Legacy)
 include_directories(Middlewares/Third_Party/FreeRTOS/Source/include)
 include_directories(Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F)
-include_directories(Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2)
 include_directories(Middlewares/Third_Party/Printf)
-include_directories(Drivers/CMSIS/Device/ST/STM32L4xx/Include)
-include_directories(Drivers/CMSIS/Include)
+include_directories(Drivers/CMSIS_5/CMSIS/RTOS2/Include)
+include_directories(Drivers/CMSIS_5/CMSIS/RTOS2/FreeRTOS/Include)
+include_directories(Drivers/CMSIS_5/Device/ST/STM32L4xx/Include)
+include_directories(Drivers/CMSIS_5/CMSIS/Core/Include)
 
 add_executable(${PROJECT_NAME}.elf ${C_SOURCES} ${ASM_SOURCES})
 
