@@ -1,7 +1,5 @@
-/* --------------------------------------------------------------------------
- * Portions Copyright � 2017 STMicroelectronics International N.V. All rights reserved.
- * Portions Copyright (c) 2013-2017 ARM Limited. All rights reserved.
- * --------------------------------------------------------------------------
+/*
+ * Copyright (c) 2013-2019 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -17,8 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * ----------------------------------------------------------------------
+ *
+ * $Date:        10. January 2017
+ * $Revision:    V2.1.0
+ *
  * Project:      CMSIS-RTOS API
- * Title:        cmsis_os.h header file
+ * Title:        cmsis_os.h FreeRTOS header file
  *
  * Version 0.02
  *    Initial Proposal Phase
@@ -36,7 +39,7 @@
  * Version 1.02
  *    Control functions for short timeouts in microsecond resolution:
  *    Added: osKernelSysTick, osKernelSysTickFrequency, osKernelSysTickMicroSec
- *    Removed: osSignalGet
+ *    Removed: osSignalGet 
  * Version 2.0.0
  *    OS objects creation without macros (dynamic creation and resource allocation):
  *     - added: osXxxxNew functions which replace osXxxxCreate
@@ -64,7 +67,7 @@
  *     - added: osThreadSuspend, osThreadResume
  *     - added: osThreadJoin, osThreadDetach, osThreadExit
  *     - added: osThreadGetCount, osThreadEnumerate
- *     - added: Thread Flags (moved from Signals)
+ *     - added: Thread Flags (moved from Signals) 
  *    Signals:
  *     - renamed osSignals to osThreadFlags (moved to Thread Flags)
  *     - changed return value of Set/Clear/Wait functions
@@ -107,7 +110,7 @@
  *     - added: osMessageQueueGetCapacity, osMessageQueueGetMsgSize
  *     - added: osMessageQueueGetCount, osMessageQueueGetSpace
  *     - added: osMessageQueueReset, osMessageQueueDelete
- *    Mail Queue:
+ *    Mail Queue: 
  *     - deprecated (superseded by extended Message Queue functionality)
  * Version 2.1.0
  *    Support for critical and uncritical sections (nesting safe):
@@ -120,11 +123,17 @@
 #ifndef CMSIS_OS_H_
 #define CMSIS_OS_H_
 
-#define osCMSIS             0x20001U    ///< API version (main[31:16].sub[15:0])
+#include "FreeRTOS.h"
+#include "task.h"
 
-#define osCMSIS_FreeRTOS    0xA0001U    ///< RTOS identification and version (main[31:16].sub[15:0])
+#define RTOS_ID_n             ((tskKERNEL_VERSION_MAJOR << 16) | (tskKERNEL_VERSION_MINOR))
+#define RTOS_ID_s             ("FreeRTOS " tskKERNEL_VERSION_NUMBER)
 
-#define osKernelSystemId    "FreeRTOS V10.0.1" ///< RTOS identification string
+#define osCMSIS               0x20001U  ///< API version (main[31:16].sub[15:0])
+
+#define osCMSIS_FreeRTOS      RTOS_ID_n ///< RTOS identification and version (main[31:16].sub[15:0])
+
+#define osKernelSystemId      RTOS_ID_s ///< RTOS identification string
 
 #define osFeature_MainThread  0         ///< main thread      1=main can be thread, 0=not available
 #define osFeature_Signals     24U       ///< maximum number of Signal Flags available per thread
@@ -144,7 +153,6 @@
 #endif
 
 #include "cmsis_os2.h"
-#include "FreeRTOS.h"
 
 #ifdef  __cplusplus
 extern "C"
@@ -391,7 +399,7 @@ int32_t osKernelRunning(void);
 #if (defined(osFeature_SysTick) && (osFeature_SysTick != 0))  // System Timer available
 
 /// Get the RTOS kernel system timer counter.
-/// \return RTOS kernel system timer as 32-bit value
+/// \return RTOS kernel system timer as 32-bit value 
 #if (osCMSIS < 0x20000U)
 uint32_t osKernelSysTick (void);
 #else
@@ -421,14 +429,14 @@ uint32_t osKernelSysTick (void);
 /// Create a Thread Definition with function, priority, and stack requirements.
 /// \param         name          name of the thread function.
 /// \param         priority      initial priority of the thread function.
-/// \param         instances     number of possible thread instances (used to statically allocate memory).
+/// \param         instances     number of possible thread instances.
 /// \param         stacksz       stack size (in bytes) requirements for the thread function.
 #if defined (osObjectsExternal)  // object is external
 #define osThreadDef(name, priority, instances, stacksz) \
 extern const osThreadDef_t os_thread_def_##name
 #else                            // define the object
 #define osThreadDef(name, priority, instances, stacksz) \
-static uint32_t os_thread_stack##name[(stacksz)?(((stacksz+3)/4)):1]; \
+static uint64_t os_thread_stack##name[(stacksz)?(((stacksz+7)/8)):1]; \
 static StaticTask_t os_thread_cb_##name; \
 const osThreadDef_t os_thread_def_##name = \
 { (name), \
@@ -436,7 +444,7 @@ const osThreadDef_t os_thread_def_##name = \
     (instances == 1) ? (&os_thread_cb_##name) : NULL,\
     (instances == 1) ? sizeof(StaticTask_t) : 0U, \
     ((stacksz) && (instances == 1)) ? (&os_thread_stack##name) : NULL, \
-    4*((stacksz+3)/4), \
+    8*((stacksz+7)/8), \
     (priority), 0U, 0U } }
 #endif
 
@@ -691,29 +699,29 @@ extern const osPoolDef_t os_pool_def_##name
 #else                            // define the object
 #define osPoolDef(name, no, type) \
 const osPoolDef_t os_pool_def_##name = \
-{ (no), sizeof(type), NULL }
+{ (no), sizeof(type), {NULL} }
 #endif
-
+ 
 /// \brief Access a Memory Pool definition.
 /// \param         name          name of the memory pool
 #define osPool(name) \
 &os_pool_def_##name
-
+ 
 /// Create and Initialize a Memory Pool object.
 /// \param[in]     pool_def      memory pool definition referenced with \ref osPool.
 /// \return memory pool ID for reference by other functions or NULL in case of error.
 osPoolId osPoolCreate (const osPoolDef_t *pool_def);
-
+ 
 /// Allocate a memory block from a Memory Pool.
 /// \param[in]     pool_id       memory pool ID obtain referenced with \ref osPoolCreate.
 /// \return address of the allocated memory block or NULL in case of no memory available.
 void *osPoolAlloc (osPoolId pool_id);
-
+ 
 /// Allocate a memory block from a Memory Pool and set memory block to zero.
 /// \param[in]     pool_id       memory pool ID obtain referenced with \ref osPoolCreate.
 /// \return address of the allocated memory block or NULL in case of no memory available.
 void *osPoolCAlloc (osPoolId pool_id);
-
+ 
 /// Return an allocated memory block back to a Memory Pool.
 /// \param[in]     pool_id       memory pool ID obtain referenced with \ref osPoolCreate.
 /// \param[in]     block         address of the allocated memory block to be returned to the memory pool.
@@ -788,42 +796,42 @@ extern const osMailQDef_t os_mailQ_def_##name
 const osMailQDef_t os_mailQ_def_##name = \
 { (queue_sz), sizeof(type), NULL }
 #endif
-
+ 
 /// \brief Access a Mail Queue Definition.
 /// \param         name          name of the queue
 #define osMailQ(name) \
 &os_mailQ_def_##name
-
+ 
 /// Create and Initialize a Mail Queue object.
 /// \param[in]     queue_def     mail queue definition referenced with \ref osMailQ.
 /// \param[in]     thread_id     thread ID (obtained by \ref osThreadCreate or \ref osThreadGetId) or NULL.
 /// \return mail queue ID for reference by other functions or NULL in case of error.
 osMailQId osMailCreate (const osMailQDef_t *queue_def, osThreadId thread_id);
-
+ 
 /// Allocate a memory block for mail from a mail memory pool.
 /// \param[in]     queue_id      mail queue ID obtained with \ref osMailCreate.
 /// \param[in]     millisec      \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out
 /// \return pointer to memory block that can be filled with mail or NULL in case of error.
 void *osMailAlloc (osMailQId queue_id, uint32_t millisec);
-
+ 
 /// Allocate a memory block for mail from a mail memory pool and set memory block to zero.
 /// \param[in]     queue_id      mail queue ID obtained with \ref osMailCreate.
 /// \param[in]     millisec      \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out
 /// \return pointer to memory block that can be filled with mail or NULL in case of error.
 void *osMailCAlloc (osMailQId queue_id, uint32_t millisec);
-
+ 
 /// Put a Mail into a Queue.
 /// \param[in]     queue_id      mail queue ID obtained with \ref osMailCreate.
 /// \param[in]     mail          pointer to memory with mail to put into a queue.
 /// \return status code that indicates the execution status of the function.
 osStatus osMailPut (osMailQId queue_id, const void *mail);
-
+ 
 /// Get a Mail from a Queue or timeout if Queue is empty.
 /// \param[in]     queue_id      mail queue ID obtained with \ref osMailCreate.
 /// \param[in]     millisec      \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out.
 /// \return event information that includes status code.
 os_InRegs osEvent osMailGet (osMailQId queue_id, uint32_t millisec);
-
+ 
 /// Free a memory block by returning it to a mail memory pool.
 /// \param[in]     queue_id      mail queue ID obtained with \ref osMailCreate.
 /// \param[in]     mail          pointer to memory block that was obtained with \ref osMailGet.
