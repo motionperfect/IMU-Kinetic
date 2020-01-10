@@ -35,7 +35,7 @@ void vErrorHandler (void)
 {
   for (;;)
 	{
-	  BSP_LED_Toggle (LED2);
+	  BSP_LED_Toggle (LED_GREEN);
 	  HAL_Delay (1000);
 	}
 }

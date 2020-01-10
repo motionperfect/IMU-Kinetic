@@ -71,10 +71,7 @@ int main (void)
 	{
 	  vMainUARTPrintString ("Fatal: µKernel failed to start.\n");
 
-	  for (;;)
-		{
-
-		}
+	  for (;;);
 	}
 }
 
