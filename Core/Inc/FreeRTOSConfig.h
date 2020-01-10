@@ -60,7 +60,7 @@ extern uint32_t SystemCoreClock;
 #define configUSE_PREEMPTION                  1
 #define configUSE_TIME_SLICING                1
 #define configIDLE_SHOULD_YIELD               1
-#define configMAX_TASK_NAME_LEN               (10)
+#define configMAX_TASK_NAME_LEN               (32)
 #define configUSE_16_BIT_TICKS                0
 
 /* Software timer definitions. */
