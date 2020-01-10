@@ -105,7 +105,7 @@ extern uint32_t SystemCoreClock;
 #define configPRIO_BITS                     __NVIC_PRIO_BITS
 #else
 /* 7 priority levels */
-#define configPRIO_BITS                     3
+#define configPRIO_BITS                     4
 #endif
 
 /* The lowest interrupt priority that can be used in a call to a "set priority" function. */
@@ -151,7 +151,7 @@ extern uint32_t SystemCoreClock;
 /* Map the FreeRTOS port interrupt handlers to their CMSIS standard names. */
 #define xPortPendSVHandler                    PendSV_Handler
 #define vPortSVCHandler                       SVC_Handler
-#define xPortSysTickHandler                   SysTick_Handler
+// #define xPortSysTickHandler                   SysTick_Handler
 
 #if (defined(__ARMCC_VERSION) || defined(__GNUC__) || defined(__ICCARM__))
 /* Include debug event definitions */
