@@ -37,20 +37,20 @@ typedef void (*IRQHandler_t) (void);
 /// \param[in]     freq         tick frequency in Hz
 /// \param[in]     handler      tick IRQ handler
 /// \return 0 on success, -1 on error.
-int32_t OS_Tick_Setup (uint32_t freq, IRQHandler_t handler);
+int32_t  OS_Tick_Setup (uint32_t freq, IRQHandler_t handler);
 
 /// Enable OS Tick timer interrupt
-void OS_Tick_Enable (void);
+void     OS_Tick_Enable (void);
 
 /// Disable OS Tick timer interrupt
-void OS_Tick_Disable (void);
+void     OS_Tick_Disable (void);
 
 /// Acknowledge execution of OS Tick timer interrupt
-void OS_Tick_AcknowledgeIRQ (void);
+void     OS_Tick_AcknowledgeIRQ (void);
 
 /// Get OS Tick timer IRQ number
 /// \return OS Tick IRQ number
-int32_t OS_Tick_GetIRQn (void);
+int32_t  OS_Tick_GetIRQn (void);
 
 /// Get OS Tick timer clock frequency
 /// \return OS Tick timer clock frequency in Hz

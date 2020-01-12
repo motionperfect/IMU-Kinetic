@@ -25,21 +25,19 @@
  *---------------------------------------------------------------------------*/
 
 #include <string.h>
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 
 #if (osCMSIS >= 0x20000U) && !defined(os1_Disable)
 
 
 // Thread
 #if !defined(os1_Disable_Thread)
-osThreadId osThreadCreate (const osThreadDef_t *thread_def, void *argument)
-{
+osThreadId osThreadCreate (const osThreadDef_t *thread_def, void *argument) {
 
-  if (thread_def == NULL)
-	{
-	  return NULL;
-	}
-  return osThreadNew ((osThreadFunc_t)thread_def->pthread, argument, &thread_def->attr);
+  if (thread_def == NULL) {
+    return NULL;
+  }
+  return osThreadNew((osThreadFunc_t)thread_def->pthread, argument, &thread_def->attr);
 }
 #endif
 
@@ -50,66 +48,57 @@ osThreadId osThreadCreate (const osThreadDef_t *thread_def, void *argument)
 
 #define SignalMask ((1U<<osFeature_Signals)-1U)
 
-int32_t osSignalSet (osThreadId thread_id, int32_t signals)
-{
+int32_t osSignalSet (osThreadId thread_id, int32_t signals) {
   uint32_t flags;
 
-  flags = osThreadFlagsSet (thread_id, (uint32_t)signals);
-  if ((flags & 0x80000000U) != 0U)
-	{
-	  return ((int32_t)0x80000000U);
-	}
+  flags = osThreadFlagsSet(thread_id, (uint32_t)signals);
+  if ((flags & 0x80000000U) != 0U) {
+    return ((int32_t)0x80000000U);
+  }
   return ((int32_t)(flags & ~((uint32_t)signals)));
 }
 
-int32_t osSignalClear (osThreadId thread_id, int32_t signals)
-{
+int32_t osSignalClear (osThreadId thread_id, int32_t signals) {
   uint32_t flags;
 
-  if (thread_id != osThreadGetId ())
-	{
-	  return ((int32_t)0x80000000U);
-	}
-  flags = osThreadFlagsClear ((uint32_t)signals);
-  if ((flags & 0x80000000U) != 0U)
-	{
-	  return ((int32_t)0x80000000U);
-	}
+  if (thread_id != osThreadGetId()) {
+    return ((int32_t)0x80000000U);
+  }
+  flags = osThreadFlagsClear((uint32_t)signals);
+  if ((flags & 0x80000000U) != 0U) {
+    return ((int32_t)0x80000000U);
+  }
   return ((int32_t)flags);
 }
 
-os_InRegs osEvent osSignalWait (int32_t signals, uint32_t millisec)
-{
-  osEvent event;
+os_InRegs osEvent osSignalWait (int32_t signals, uint32_t millisec) {
+  osEvent  event;
   uint32_t flags;
 
-  if (signals != 0)
-	{
-	  flags = osThreadFlagsWait ((uint32_t)signals, osFlagsWaitAll, millisec);
-	}
-  else
-	{
-	  flags = osThreadFlagsWait (SignalMask, osFlagsWaitAny, millisec);
-	}
-  if ((flags > 0U) && (flags < 0x80000000U))
-	{
-	  event.status = osEventSignal;
-	  event.value.signals = (int32_t)flags;
-	}
-  else
-	{
-	  switch ((int32_t)flags)
-		{
-		  case osErrorResource:event.status = osOK;
-		  break;
-		  case osErrorTimeout:event.status = osEventTimeout;
-		  break;
-		  case osErrorParameter:event.status = osErrorValue;
-		  break;
-		  default:event.status = (osStatus)flags;
-		  break;
-		}
-	}
+  if (signals != 0) {
+    flags = osThreadFlagsWait((uint32_t)signals, osFlagsWaitAll, millisec);
+  } else {
+    flags = osThreadFlagsWait(SignalMask,        osFlagsWaitAny, millisec);
+  }
+  if ((flags > 0U) && (flags < 0x80000000U)) {
+    event.status = osEventSignal;
+    event.value.signals = (int32_t)flags;
+  } else {
+    switch ((int32_t)flags) {
+      case osErrorResource:
+        event.status = osOK;
+        break;
+      case osErrorTimeout:
+        event.status = osEventTimeout;
+        break;
+      case osErrorParameter:
+        event.status = osErrorValue;
+        break;
+      default:
+        event.status = (osStatus)flags;
+        break;
+    }
+  }
   return event;
 }
 
@@ -118,29 +107,24 @@ os_InRegs osEvent osSignalWait (int32_t signals, uint32_t millisec)
 
 // Timer
 #if !defined(os1_Disable_Timer)
-osTimerId
-osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument)
-{
+osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument) {
 
-  if (timer_def == NULL)
-	{
-	  return NULL;
-	}
-  return osTimerNew ((osTimerFunc_t)timer_def->ptimer, type, argument, &timer_def->attr);
+  if (timer_def == NULL) {
+    return NULL;
+  }
+  return osTimerNew((osTimerFunc_t)timer_def->ptimer, type, argument, &timer_def->attr);
 }
 #endif
 
 
 // Mutex
 #if !defined(os1_Disable_Mutex)
-osMutexId osMutexCreate (const osMutexDef_t *mutex_def)
-{
+osMutexId osMutexCreate (const osMutexDef_t *mutex_def) {
 
-  if (mutex_def == NULL)
-	{
-	  return NULL;
-	}
-  return osMutexNew (mutex_def);
+  if (mutex_def == NULL) {
+    return NULL;
+  }
+  return osMutexNew(mutex_def);
 }
 #endif
 
@@ -149,31 +133,29 @@ osMutexId osMutexCreate (const osMutexDef_t *mutex_def)
 
 #if (defined (osFeature_Semaphore) && (osFeature_Semaphore != 0U)) && !defined(os1_Disable_Semaphore)
 
-osSemaphoreId
-osSemaphoreCreate (const osSemaphoreDef_t *semaphore_def, int32_t count)
-{
+osSemaphoreId osSemaphoreCreate (const osSemaphoreDef_t *semaphore_def, int32_t count) {
 
-  if (semaphore_def == NULL)
-	{
-	  return NULL;
-	}
-  return osSemaphoreNew ((uint32_t)count, (uint32_t)count, semaphore_def);
+  if (semaphore_def == NULL) {
+    return NULL;
+  }
+  return osSemaphoreNew((uint32_t)count, (uint32_t)count, semaphore_def);
 }
 
-int32_t osSemaphoreWait (osSemaphoreId semaphore_id, uint32_t millisec)
-{
+int32_t osSemaphoreWait (osSemaphoreId semaphore_id, uint32_t millisec) {
   osStatus_t status;
-  uint32_t count;
+  uint32_t   count;
 
-  status = osSemaphoreAcquire (semaphore_id, millisec);
-  switch (status)
-	{
-	  case osOK:count = osSemaphoreGetCount (semaphore_id);
-	  return ((int32_t)count + 1);
-	  case osErrorResource:
-	  case osErrorTimeout:return 0;
-	  default:break;
-	}
+  status = osSemaphoreAcquire(semaphore_id, millisec);
+  switch (status) {
+    case osOK:
+      count = osSemaphoreGetCount(semaphore_id);
+      return ((int32_t)count + 1);
+    case osErrorResource:
+    case osErrorTimeout:
+      return 0;
+    default:
+      break;
+  }
   return -1;
 }
 
@@ -182,12 +164,12 @@ int32_t osSemaphoreWait (osSemaphoreId semaphore_id, uint32_t millisec)
 
 // Memory Pool
 
-#if (defined(osFeature_Pool) && (osFeature_Pool != 0)) && !defined(os1_Disable_Pool)
+#if (defined(osFeature_Pool) && (osFeature_Pool != 0))&& !defined(os1_Disable_Pool)
 
 osPoolId osPoolCreate (const osPoolDef_t *pool_def) {
 
   if (pool_def == NULL) {
-	return NULL;
+    return NULL;
   }
   return osMemoryPoolNew(pool_def->pool_sz, pool_def->item_sz, &pool_def->attr);
 }
@@ -202,11 +184,11 @@ void *osPoolCAlloc (osPoolId pool_id) {
 
   block_size = osMemoryPoolGetBlockSize((osMemoryPoolId_t)pool_id);
   if (block_size == 0U) {
-	return NULL;
+    return NULL;
   }
   block = osMemoryPoolAlloc(pool_id, 0U);
   if (block != NULL) {
-	memset(block, 0, block_size);
+    memset(block, 0, block_size);
   }
   return block;
 }
@@ -222,42 +204,40 @@ osStatus osPoolFree (osPoolId pool_id, void *block) {
 
 #if (defined(osFeature_MessageQ) && (osFeature_MessageQ != 0)) && !defined(os1_Disable_MessageQ)
 
-osMessageQId
-osMessageCreate (const osMessageQDef_t *queue_def, osThreadId thread_id)
-{
+osMessageQId osMessageCreate (const osMessageQDef_t *queue_def, osThreadId thread_id) {
   (void)thread_id;
 
-  if (queue_def == NULL)
-	{
-	  return NULL;
-	}
-  return osMessageQueueNew (queue_def->queue_sz, sizeof (uint32_t), &queue_def->attr);
+  if (queue_def == NULL) {
+    return NULL;
+  }
+  return osMessageQueueNew(queue_def->queue_sz, sizeof(uint32_t), &queue_def->attr);
 }
 
-osStatus osMessagePut (osMessageQId queue_id, uint32_t info, uint32_t millisec)
-{
-  return osMessageQueuePut (queue_id, &info, 0U, millisec);
+osStatus osMessagePut (osMessageQId queue_id, uint32_t info, uint32_t millisec) {
+  return osMessageQueuePut(queue_id, &info, 0U, millisec);
 }
 
-os_InRegs osEvent osMessageGet (osMessageQId queue_id, uint32_t millisec)
-{
+os_InRegs osEvent osMessageGet (osMessageQId queue_id, uint32_t millisec) {
   osStatus_t status;
-  osEvent event;
-  uint32_t message;
+  osEvent    event;
+  uint32_t   message;
 
-  status = osMessageQueueGet (queue_id, &message, NULL, millisec);
-  switch (status)
-	{
-	  case osOK:event.status = osEventMessage;
-	  event.value.v = message;
-	  break;
-	  case osErrorResource:event.status = osOK;
-	  break;
-	  case osErrorTimeout:event.status = osEventTimeout;
-	  break;
-	  default:event.status = status;
-	  break;
-	}
+  status = osMessageQueueGet(queue_id, &message, NULL, millisec);
+  switch (status) {
+    case osOK:
+      event.status = osEventMessage;
+      event.value.v = message;
+      break;
+    case osErrorResource:
+      event.status = osOK;
+      break;
+    case osErrorTimeout:
+      event.status = osEventTimeout;
+      break;
+    default:
+      event.status = status;
+      break;
+  }
   return event;
 }
 
@@ -278,24 +258,24 @@ osMailQId osMailCreate (const osMailQDef_t *queue_def, osThreadId thread_id) {
   (void)thread_id;
 
   if (queue_def == NULL) {
-	return NULL;
+    return NULL;
   }
 
   ptr = queue_def->mail;
   if (ptr == NULL) {
-	return NULL;
+    return NULL;
   }
 
   ptr->mp_id = osMemoryPoolNew  (queue_def->queue_sz, queue_def->item_sz, &queue_def->mp_attr);
   ptr->mq_id = osMessageQueueNew(queue_def->queue_sz, sizeof(void *), &queue_def->mq_attr);
   if ((ptr->mp_id == NULL) || (ptr->mq_id == NULL)) {
-	if (ptr->mp_id != NULL) {
-	  osMemoryPoolDelete(ptr->mp_id);
-	}
-	if (ptr->mq_id != NULL) {
-	  osMessageQueueDelete(ptr->mq_id);
-	}
-	return NULL;
+    if (ptr->mp_id != NULL) {
+      osMemoryPoolDelete(ptr->mp_id);
+    }
+    if (ptr->mq_id != NULL) {
+      osMessageQueueDelete(ptr->mq_id);
+    }
+    return NULL;
   }
 
   return ptr;
@@ -305,7 +285,7 @@ void *osMailAlloc (osMailQId queue_id, uint32_t millisec) {
   os_mail_queue_t *ptr = (os_mail_queue_t *)queue_id;
 
   if (ptr == NULL) {
-	return NULL;
+    return NULL;
   }
   return osMemoryPoolAlloc(ptr->mp_id, millisec);
 }
@@ -316,15 +296,15 @@ void *osMailCAlloc (osMailQId queue_id, uint32_t millisec) {
   uint32_t         block_size;
 
   if (ptr == NULL) {
-	return NULL;
+    return NULL;
   }
   block_size = osMemoryPoolGetBlockSize(ptr->mp_id);
   if (block_size == 0U) {
-	return NULL;
+    return NULL;
   }
   block = osMemoryPoolAlloc(ptr->mp_id, millisec);
   if (block != NULL) {
-	memset(block, 0, block_size);
+    memset(block, 0, block_size);
   }
 
   return block;
@@ -335,10 +315,10 @@ osStatus osMailPut (osMailQId queue_id, const void *mail) {
   os_mail_queue_t *ptr = (os_mail_queue_t *)queue_id;
 
   if (ptr == NULL) {
-	return osErrorParameter;
+    return osErrorParameter;
   }
   if (mail == NULL) {
-	return osErrorValue;
+    return osErrorValue;
   }
   return osMessageQueuePut(ptr->mq_id, &mail, 0U, 0U);
 }
@@ -350,25 +330,25 @@ os_InRegs osEvent osMailGet (osMailQId queue_id, uint32_t millisec) {
   void            *mail;
 
   if (ptr == NULL) {
-	event.status = osErrorParameter;
-	return event;
+    event.status = osErrorParameter;
+    return event;
   }
 
   status = osMessageQueueGet(ptr->mq_id, &mail, NULL, millisec);
   switch (status) {
-	case osOK:
-	  event.status = osEventMail;
-	  event.value.p = mail;
-	  break;
-	case osErrorResource:
-	  event.status = osOK;
-	  break;
-	case osErrorTimeout:
-	  event.status = osEventTimeout;
-	  break;
-	default:
-	  event.status = status;
-	  break;
+    case osOK:
+      event.status = osEventMail;
+      event.value.p = mail;
+      break;
+    case osErrorResource:
+      event.status = osOK;
+      break;
+    case osErrorTimeout:
+      event.status = osEventTimeout;
+      break;
+    default:
+      event.status = status;
+      break;
   }
   return event;
 }
@@ -377,14 +357,15 @@ osStatus osMailFree (osMailQId queue_id, void *mail) {
   os_mail_queue_t *ptr = (os_mail_queue_t *)queue_id;
 
   if (ptr == NULL) {
-	return osErrorParameter;
+    return osErrorParameter;
   }
   if (mail == NULL) {
-	return osErrorValue;
+    return osErrorValue;
   }
   return osMemoryPoolFree(ptr->mp_id, mail);
 }
 
 #endif  // Mail Queue
+
 
 #endif  // osCMSIS

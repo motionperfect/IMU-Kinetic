@@ -39,16 +39,16 @@ typedef struct {
 /* Memory Pool control block */
 typedef struct MemPoolDef_t {
   MPOOL_BLOCK *head;            /* Pointer to head block  */
-  MPOOL_SEM sem;             /* Pool semaphore object  */
-  uint8_t *mem_arr;         /* Pool memory array      */
-  uint32_t mem_sz;          /* Pool memory array size */
+  MPOOL_SEM    sem;             /* Pool semaphore object  */
+  uint8_t     *mem_arr;         /* Pool memory array      */
+  uint32_t     mem_sz;          /* Pool memory array size */
   const
-  char *name;            /* Pointer to name string */
-  uint32_t bl_sz;           /* Size of a single block */
-  uint32_t bl_cnt;          /* Number of blocks       */
-  uint32_t n;               /* Block allocation index */
+  char        *name;            /* Pointer to name string */
+  uint32_t     bl_sz;           /* Size of a single block */
+  uint32_t     bl_cnt;          /* Number of blocks       */
+  uint32_t     n;               /* Block allocation index */
   volatile
-  uint32_t status;          /* Object status flags    */
+  uint32_t     status;          /* Object status flags    */
 } MemPool_t;
 
 /* No need to hide static object type, just align to coding style */

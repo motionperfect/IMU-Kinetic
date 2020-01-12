@@ -29,10 +29,10 @@
 #include "RTE_Components.h"
 
 #if !defined(RTE_Compiler_EventRecorder)
-/* Disable debug events if Event Recorder is not used */
-#ifndef EVR_FREERTOS_DISABLE
-#define EVR_FREERTOS_DISABLE
-#endif
+  /* Disable debug events if Event Recorder is not used */
+  #ifndef EVR_FREERTOS_DISABLE
+    #define EVR_FREERTOS_DISABLE
+  #endif
 #endif
 
 /* Temporarily define FreeRTOS object types */
@@ -83,8 +83,7 @@ extern void EvrFreeRTOSTasks_TaskDelay (uint32_t xTicksToDelay);
   \param[in]  pxTCB             pointer to task handle.
   \param[in]  uxNewPriority
 */
-extern void
-EvrFreeRTOSTasks_TaskPrioritySet (TCB_t pxTCB, uint32_t uxNewPriority);
+extern void EvrFreeRTOSTasks_TaskPrioritySet (TCB_t pxTCB, uint32_t uxNewPriority);
 
 /**
   \brief  Event on task suspend (Op)
@@ -127,24 +126,21 @@ extern void EvrFreeRTOSTasks_TaskSwitchedOut (TCB_t pxCurrentTCB);
   \param[in]  pxCurrentTCB      handle to the task about to enter the running state.
   \param[in]  uxTopPriority     pxCurrentTCB task priority.
 */
-extern void
-EvrFreeRTOSTasks_TaskSwitchedIn (TCB_t pxCurrentTCB, uint32_t uxTopPriority);
+extern void EvrFreeRTOSTasks_TaskSwitchedIn  (TCB_t pxCurrentTCB, uint32_t uxTopPriority);
 
 /**
   \brief  Event on task priority inheritance (Op)
   \param[in]  pxTCBOfMutexHolder  pointer to task handle.
   \param[in]  uxInheritedPriority new (inherited) task priority.
 */
-extern void
-EvrFreeRTOSTasks_TaskPriorityInherit (TCB_t pxTCBOfMutexHolder, uint32_t uxInheritedPriority);
+extern void EvrFreeRTOSTasks_TaskPriorityInherit (TCB_t pxTCBOfMutexHolder, uint32_t uxInheritedPriority);
 
 /**
   \brief  Event on task priority disinheritance (Op)
   \param[in]  pxTCBOfMutexHolder  pointer to task handle.
   \param[in]  uxOriginalPriority  old (original) task priority.
 */
-extern void
-EvrFreeRTOSTasks_TaskPriorityDisinherit (TCB_t pxTCBOfMutexHolder, uint32_t uxOriginalPriority);
+extern void EvrFreeRTOSTasks_TaskPriorityDisinherit (TCB_t pxTCBOfMutexHolder, uint32_t uxOriginalPriority);
 
 /**
   \brief  Event sent before transition of a task into the Ready state (Op)
@@ -200,8 +196,7 @@ extern void EvrFreeRTOSTasks_TaskNotifyWait (uint32_t ulNotifiedValue);
   \param[in]  eAction           task notification action.
   \param[in]  ulNotifiedValue   current state of the notification value.
 */
-extern void
-EvrFreeRTOSTasks_TaskNotify (TCB_t xTaskToNotify, uint32_t ulValue, uint32_t eAction, uint32_t ulNotifiedValue);
+extern void EvrFreeRTOSTasks_TaskNotify (TCB_t xTaskToNotify, uint32_t ulValue, uint32_t eAction, uint32_t ulNotifiedValue);
 
 /**
   \brief  Event on successful task notify from ISR (Op)
@@ -210,16 +205,14 @@ EvrFreeRTOSTasks_TaskNotify (TCB_t xTaskToNotify, uint32_t ulValue, uint32_t eAc
   \param[in]  eAction           task notification action.
   \param[in]  ulNotifiedValue   current state of the notification value.
 */
-extern void
-EvrFreeRTOSTasks_TaskNotifyFromIsr (TCB_t xTaskToNotify, uint32_t ulValue, uint32_t eAction, uint32_t ulNotifiedValue);
+extern void EvrFreeRTOSTasks_TaskNotifyFromIsr (TCB_t xTaskToNotify, uint32_t ulValue, uint32_t eAction, uint32_t ulNotifiedValue);
 
 /**
   \brief  Event on successful task notify give from ISR (Op)
   \param[in]  xTaskToNotify     pointer to task to be notified.
   \param[in]  ulNotifiedValue   current state of the notification value.
 */
-extern void
-EvrFreeRTOSTasks_TaskNotifyGiveFromIsr (TCB_t xTaskToNotify, uint32_t ulNotifiedValue);
+extern void EvrFreeRTOSTasks_TaskNotifyGiveFromIsr (TCB_t xTaskToNotify, uint32_t ulNotifiedValue);
 
 /**
   \brief  Event on successful queue create (Op)
@@ -362,8 +355,7 @@ extern void EvrFreeRTOSQueue_QueueDelete (Queue_t pxQueue);
   \param[in]  pxQueue           pointer to queue object handle.
   \param[in]  pcQueueName       pointer to queue object name.
 */
-extern void
-EvrFreeRTOSQueue_QueueRegistryAdd (Queue_t pxQueue, const char *pcQueueName);
+extern void EvrFreeRTOSQueue_QueueRegistryAdd (Queue_t pxQueue, const char *pcQueueName);
 
 /**
   \brief  Event indicating the current running task is about to block while reading from an empty queue (Op)
@@ -395,8 +387,7 @@ extern void EvrFreeRTOSTimers_TimerCreateFailed (void);
   \param[in]  xOptionalValue    optional command value.
   \param[in]  xReturn           return value.
 */
-extern void
-EvrFreeRTOSTimers_TimerCommandSend (Timer_t pxTimer, uint32_t xCommandID, uint32_t xOptionalValue, uint32_t xReturn);
+extern void EvrFreeRTOSTimers_TimerCommandSend (Timer_t pxTimer, uint32_t xCommandID, uint32_t xOptionalValue, uint32_t xReturn);
 
 /**
   \brief  Event on timer queue command receive (Op)
@@ -404,8 +395,7 @@ EvrFreeRTOSTimers_TimerCommandSend (Timer_t pxTimer, uint32_t xCommandID, uint32
   \param[in]  xCommandID        timer command ID.
   \param[in]  xOptionalValue    optional command value.
 */
-extern void
-EvrFreeRTOSTimers_TimerCommandReceived (Timer_t pxTimer, uint32_t xCommandID, uint32_t xOptionalValue);
+extern void EvrFreeRTOSTimers_TimerCommandReceived (Timer_t pxTimer, uint32_t xCommandID, uint32_t xOptionalValue);
 
 /**
   \brief  Event on timer expire (Op)
@@ -420,8 +410,7 @@ extern void EvrFreeRTOSTimers_TimerExpired (Timer_t pxTimer);
   \param[in]  ulParameter2      function parameter 2.
   \param[in]  xReturn           return value.
 */
-extern void
-EvrFreeRTOSTimers_PendFuncCall (PendedFunction_t pxFunctionToPend, void *pvParameter1, uint32_t ulParameter2, uint32_t xReturn);
+extern void EvrFreeRTOSTimers_PendFuncCall (PendedFunction_t pxFunctionToPend, void *pvParameter1, uint32_t ulParameter2, uint32_t xReturn);
 
 /**
   \brief  Event on pass of the function execution to the timer service task from the ISR (Op)
@@ -430,8 +419,7 @@ EvrFreeRTOSTimers_PendFuncCall (PendedFunction_t pxFunctionToPend, void *pvParam
   \param[in]  ulParameter2      function parameter 2.
   \param[in]  xReturn           return value.
 */
-extern void
-EvrFreeRTOSTimers_PendFuncCallFromIsr (PendedFunction_t pxFunctionToPend, void *pvParameter1, uint32_t ulParameter2, uint32_t xReturn);
+extern void EvrFreeRTOSTimers_PendFuncCallFromIsr (PendedFunction_t pxFunctionToPend, void *pvParameter1, uint32_t ulParameter2, uint32_t xReturn);
 
 /**
   \brief  Event on successful event groups object create (Op)
@@ -450,8 +438,7 @@ extern void EvrFreeRTOSEventGroups_EventGroupCreateFailed (void);
   \param[in]  uxBitsToSet       event bits that shall be set.
   \param[in]  uxBitsToWaitFor   event bits to wait for.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupSyncBlock (EventGroup_t pxEventGroup, uint32_t uxBitsToSet, uint32_t uxBitsToWaitFor);
+extern void EvrFreeRTOSEventGroups_EventGroupSyncBlock (EventGroup_t pxEventGroup, uint32_t uxBitsToSet, uint32_t uxBitsToWaitFor);
 
 /**
   \brief  Event on event groups sync completed (Op)
@@ -460,16 +447,14 @@ EvrFreeRTOSEventGroups_EventGroupSyncBlock (EventGroup_t pxEventGroup, uint32_t 
   \param[in]  uxBitsToWaitFor   event bits to wait for.
   \param[in]  xTimeoutOccurred  timeout value.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupSyncEnd (EventGroup_t pxEventGroup, uint32_t uxBitsToSet, uint32_t uxBitsToWaitFor, uint32_t xTimeoutOccurred);
+extern void EvrFreeRTOSEventGroups_EventGroupSyncEnd (EventGroup_t pxEventGroup, uint32_t uxBitsToSet, uint32_t uxBitsToWaitFor, uint32_t xTimeoutOccurred);
 
 /**
   \brief  Event on event groups bit wait start (Op)
   \param[in]  pxEventGroup      pointer to Event Groups object handle.
   \param[in]  uxBitsToWaitFor   event bits to wait for.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupWaitBitsBlock (EventGroup_t pxEventGroup, uint32_t uxBitsToWaitFor);
+extern void EvrFreeRTOSEventGroups_EventGroupWaitBitsBlock (EventGroup_t pxEventGroup, uint32_t uxBitsToWaitFor);
 
 /**
   \brief  Event on event groups bit wait completed (Op)
@@ -477,40 +462,35 @@ EvrFreeRTOSEventGroups_EventGroupWaitBitsBlock (EventGroup_t pxEventGroup, uint3
   \param[in]  uxBitsToWaitFor   event bits to wait for.
   \param[in]  xTimeoutOccurred  timeout value.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupWaitBitsEnd (EventGroup_t pxEventGroup, uint32_t uxBitsToWaitFor, uint32_t xTimeoutOccurred);
+extern void EvrFreeRTOSEventGroups_EventGroupWaitBitsEnd (EventGroup_t pxEventGroup, uint32_t uxBitsToWaitFor, uint32_t xTimeoutOccurred);
 
 /**
   \brief  Event on event groups bit clear (Op)
   \param[in]  pxEventGroup      pointer to Event Groups object handle.
   \param[in]  uxBitsToClear     event bits that shall be cleared.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupClearBits (EventGroup_t pxEventGroup, uint32_t uxBitsToClear);
+extern void EvrFreeRTOSEventGroups_EventGroupClearBits (EventGroup_t pxEventGroup, uint32_t uxBitsToClear);
 
 /**
   \brief  Event on event groups bit clear call from ISR (Op)
   \param[in]  pxEventGroup      pointer to Event Groups object handle.
   \param[in]  uxBitsToClear     event bits that shall be cleared.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupClearBitsFromIsr (EventGroup_t pxEventGroup, uint32_t uxBitsToClear);
+extern void EvrFreeRTOSEventGroups_EventGroupClearBitsFromIsr (EventGroup_t pxEventGroup, uint32_t uxBitsToClear);
 
 /**
   \brief  Event on event groups bit set (Op)
   \param[in]  pxEventGroup      pointer to Event Groups object handle.
   \param[in]  uxBitsToSet       event bits that shall be set.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupSetBits (EventGroup_t pxEventGroup, uint32_t uxBitsToSet);
+extern void EvrFreeRTOSEventGroups_EventGroupSetBits (EventGroup_t pxEventGroup, uint32_t uxBitsToSet);
 
 /**
   \brief  Event on event groups bit set call from ISR (Op)
   \param[in]  pxEventGroup      pointer to Event Groups object handle.
   \param[in]  uxBitsToSet       event bits that shall be set.
 */
-extern void
-EvrFreeRTOSEventGroups_EventGroupSetBitsFromIsr (EventGroup_t pxEventGroup, uint32_t uxBitsToSet);
+extern void EvrFreeRTOSEventGroups_EventGroupSetBitsFromIsr (EventGroup_t pxEventGroup, uint32_t uxBitsToSet);
 
 /**
   \brief  Event on event groups object delete (Op)
@@ -522,98 +502,85 @@ extern void EvrFreeRTOSEventGroups_EventGroupDelete (EventGroup_t pxEventGroup);
   \brief  Event on unsuccessful stream buffer object create (Error)
   \param[in]  uxIsMessageBuffer buffer type designator (0:stream, 1:message).
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferCreateFailed (uint32_t uxIsMessageBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferCreateFailed (uint32_t uxIsMessageBuffer);
 
 /**
   \brief  Event on unsuccessful stream buffer object create (Error)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
   \param[in]  uxIsMessageBuffer buffer type designator (0:stream, 1:message).
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferCreateStaticFailed (StreamBuffer_t pxStreamBuffer, uint32_t uxIsMessageBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferCreateStaticFailed (StreamBuffer_t pxStreamBuffer, uint32_t uxIsMessageBuffer);
 
 /**
   \brief  Event on successful stream buffer object create (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
   \param[in]  uxIsMessageBuffer buffer type designator (0:stream, 1:message).
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferCreate (StreamBuffer_t pxStreamBuffer, uint32_t uxIsMessageBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferCreate (StreamBuffer_t pxStreamBuffer, uint32_t uxIsMessageBuffer);
 
 /**
   \brief  Event on stream buffer object delete (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferDelete (StreamBuffer_t pxStreamBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferDelete (StreamBuffer_t pxStreamBuffer);
 
 /**
   \brief  Event on stream buffer object reset (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferReset (StreamBuffer_t pxStreamBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferReset (StreamBuffer_t pxStreamBuffer);
 
 /**
   \brief  Event on stream buffer send when buffer is full and sending task is blocked (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferBlockingOnSend (StreamBuffer_t pxStreamBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferBlockingOnSend (StreamBuffer_t pxStreamBuffer);
 
 /**
   \brief  Event on stream buffer send when data is successfully copied into the buffer (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
   \param[in]  xBytesSent        number of bytes copied into the buffer
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferSend (StreamBuffer_t pxStreamBuffer, uint32_t xBytesSent);
+extern void EvrFreeRTOSStreamBuf_StreamBufferSend (StreamBuffer_t pxStreamBuffer, uint32_t xBytesSent);
 
 /**
   \brief  Event on stream buffer send when data is not copied into the buffer (Error)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferSendFailed (StreamBuffer_t pxStreamBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferSendFailed (StreamBuffer_t pxStreamBuffer);
 
 /**
   \brief  Event on stream buffer send from ISR when data is successfully copied into the buffer (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
   \param[in]  xBytesSent        number of bytes copied into the buffer
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferSendFromIsr (StreamBuffer_t pxStreamBuffer, uint32_t xBytesSent);
+extern void EvrFreeRTOSStreamBuf_StreamBufferSendFromIsr (StreamBuffer_t pxStreamBuffer, uint32_t xBytesSent);
 
 /**
   \brief  Event on stream buffer receive when buffer is empty and receiving task is blocked (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferBlockingOnReceive (StreamBuffer_t pxStreamBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferBlockingOnReceive (StreamBuffer_t pxStreamBuffer);
 
 /**
   \brief  Event on stream buffer receive when data is successfully copied from the buffer (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
   \param[in]  xReceivedLength   number of bytes copied from the buffer
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferReceive (StreamBuffer_t pxStreamBuffer, uint32_t xReceivedLength);
+extern void EvrFreeRTOSStreamBuf_StreamBufferReceive (StreamBuffer_t pxStreamBuffer, uint32_t xReceivedLength);
 
 /**
   \brief  Event on stream buffer receive when data is not copied from the buffer (Error)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferReceiveFailed (StreamBuffer_t pxStreamBuffer);
+extern void EvrFreeRTOSStreamBuf_StreamBufferReceiveFailed (StreamBuffer_t pxStreamBuffer);
 
 /**
   \brief  Event on stream buffer receive from ISR when data is successfully copied from the buffer (Op)
   \param[in]  pxStreamBuffer    pointer to Stream Buffer object handle.
   \param[in]  xReceivedLength   number of bytes copied from the buffer
 */
-extern void
-EvrFreeRTOSStreamBuf_StreamBufferReceiveFromIsr (StreamBuffer_t pxStreamBuffer, uint32_t xReceivedLength);
+extern void EvrFreeRTOSStreamBuf_StreamBufferReceiveFromIsr (StreamBuffer_t pxStreamBuffer, uint32_t xReceivedLength);
 
 /**
   \brief  Event on heap memory block allocation (Op)
@@ -633,358 +600,358 @@ extern void EvrFreeRTOSHeap_Free (void *pvAddress, uint32_t uiSize);
 /* Tasks */
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_CREATE_DISABLE))
-#define traceTASK_CREATE(px)                        EvrFreeRTOSTasks_TaskCreate(px)
+  #define traceTASK_CREATE(px)                        EvrFreeRTOSTasks_TaskCreate(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_CREATE_FAILED_DISABLE))
-#define traceTASK_CREATE_FAILED()                   EvrFreeRTOSTasks_TaskCreateFailed()
+  #define traceTASK_CREATE_FAILED()                   EvrFreeRTOSTasks_TaskCreateFailed()
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_DELETE_DISABLE))
-#define traceTASK_DELETE(px)                        EvrFreeRTOSTasks_TaskDelete(px)
+  #define traceTASK_DELETE(px)                        EvrFreeRTOSTasks_TaskDelete(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_DELAY_UNTIL_DISABLE))
-#define traceTASK_DELAY_UNTIL(x)                    EvrFreeRTOSTasks_TaskDelayUntil(x)
+  #define traceTASK_DELAY_UNTIL(x)                    EvrFreeRTOSTasks_TaskDelayUntil(x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_DELAY_DISABLE))
-#define traceTASK_DELAY()                           EvrFreeRTOSTasks_TaskDelay(xTicksToDelay)
+  #define traceTASK_DELAY()                           EvrFreeRTOSTasks_TaskDelay(xTicksToDelay)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_PRIORITY_SET_DISABLE))
-#define traceTASK_PRIORITY_SET(px,ux)               EvrFreeRTOSTasks_TaskPrioritySet(px,ux)
+  #define traceTASK_PRIORITY_SET(px,ux)               EvrFreeRTOSTasks_TaskPrioritySet(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_SUSPEND_DISABLE))
-#define traceTASK_SUSPEND(px)                       EvrFreeRTOSTasks_TaskSuspend(px)
+  #define traceTASK_SUSPEND(px)                       EvrFreeRTOSTasks_TaskSuspend(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_RESUME_DISABLE))
-#define traceTASK_RESUME(px)                        EvrFreeRTOSTasks_TaskResume(px)
+  #define traceTASK_RESUME(px)                        EvrFreeRTOSTasks_TaskResume(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_RESUME_FROM_ISR_DISABLE))
-#define traceTASK_RESUME_FROM_ISR(px)               EvrFreeRTOSTasks_TaskResumeFromIsr(px)
+  #define traceTASK_RESUME_FROM_ISR(px)               EvrFreeRTOSTasks_TaskResumeFromIsr(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_INCREMENT_TICK_DISABLE))
-#define traceTASK_INCREMENT_TICK(x)                 EvrFreeRTOSTasks_TaskIncrementTick(x)
+  #define traceTASK_INCREMENT_TICK(x)                 EvrFreeRTOSTasks_TaskIncrementTick(x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceINCREASE_TICK_COUNT_DISABLE))
-#define traceINCREASE_TICK_COUNT(x)                 EvrFreeRTOSTasks_IncreaseTickCount(x)
+  #define traceINCREASE_TICK_COUNT(x)                 EvrFreeRTOSTasks_IncreaseTickCount(x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_SWITCHED_OUT_DISABLE))
-#define traceTASK_SWITCHED_OUT()                    EvrFreeRTOSTasks_TaskSwitchedOut(pxCurrentTCB)
+  #define traceTASK_SWITCHED_OUT()                    EvrFreeRTOSTasks_TaskSwitchedOut(pxCurrentTCB)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_SWITCHED_IN_DISABLE))
-#define traceTASK_SWITCHED_IN()                     EvrFreeRTOSTasks_TaskSwitchedIn(pxCurrentTCB, uxTopReadyPriority)
+  #define traceTASK_SWITCHED_IN()                     EvrFreeRTOSTasks_TaskSwitchedIn(pxCurrentTCB, uxTopReadyPriority)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_PRIORITY_INHERIT_DISABLE))
-#define traceTASK_PRIORITY_INHERIT(px,ux)           EvrFreeRTOSTasks_TaskPriorityInherit(px,ux)
+  #define traceTASK_PRIORITY_INHERIT(px,ux)           EvrFreeRTOSTasks_TaskPriorityInherit(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_PRIORITY_DISINHERIT_DISABLE))
-#define traceTASK_PRIORITY_DISINHERIT(px,ux)        EvrFreeRTOSTasks_TaskPriorityDisinherit(px,ux)
+  #define traceTASK_PRIORITY_DISINHERIT(px,ux)        EvrFreeRTOSTasks_TaskPriorityDisinherit(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceMOVED_TASK_TO_READY_STATE_DISABLE))
-#define traceMOVED_TASK_TO_READY_STATE(px)          EvrFreeRTOSTasks_MovedTaskToReadyState(px)
+  #define traceMOVED_TASK_TO_READY_STATE(px)          EvrFreeRTOSTasks_MovedTaskToReadyState(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(tracePOST_MOVED_TASK_TO_READY_STATE_DISABLE))
-#define tracePOST_MOVED_TASK_TO_READY_STATE(px)     EvrFreeRTOSTasks_PostMovedTaskToReadyState(px)
+  #define tracePOST_MOVED_TASK_TO_READY_STATE(px)     EvrFreeRTOSTasks_PostMovedTaskToReadyState(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceLOW_POWER_IDLE_BEGIN_DISABLE))
-#define traceLOW_POWER_IDLE_BEGIN()                 EvrFreeRTOSTasks_LowPowerIdleBegin(xExpectedIdleTime)
+  #define traceLOW_POWER_IDLE_BEGIN()                 EvrFreeRTOSTasks_LowPowerIdleBegin(xExpectedIdleTime)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceLOW_POWER_IDLE_END_DISABLE))
-#define traceLOW_POWER_IDLE_END()                   EvrFreeRTOSTasks_LowPowerIdleEnd()
+  #define traceLOW_POWER_IDLE_END()                   EvrFreeRTOSTasks_LowPowerIdleEnd()
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_NOTIFY_TAKE_BLOCK_DISABLE))
-#define traceTASK_NOTIFY_TAKE_BLOCK()               EvrFreeRTOSTasks_TaskNotifyTakeBlock(xTicksToWait)
+  #define traceTASK_NOTIFY_TAKE_BLOCK()               EvrFreeRTOSTasks_TaskNotifyTakeBlock(xTicksToWait)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_NOTIFY_TAKE_DISABLE))
-#define traceTASK_NOTIFY_TAKE()                     EvrFreeRTOSTasks_TaskNotifyTake(pxCurrentTCB->ulNotifiedValue)
+  #define traceTASK_NOTIFY_TAKE()                     EvrFreeRTOSTasks_TaskNotifyTake(pxCurrentTCB->ulNotifiedValue)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_NOTIFY_WAIT_BLOCK_DISABLE))
-#define traceTASK_NOTIFY_WAIT_BLOCK()               EvrFreeRTOSTasks_TaskNotifyWaitBlock(xTicksToWait)
+  #define traceTASK_NOTIFY_WAIT_BLOCK()               EvrFreeRTOSTasks_TaskNotifyWaitBlock(xTicksToWait)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_NOTIFY_WAIT_DISABLE))
-#define traceTASK_NOTIFY_WAIT()                     EvrFreeRTOSTasks_TaskNotifyWait(pxCurrentTCB->ulNotifiedValue)
+  #define traceTASK_NOTIFY_WAIT()                     EvrFreeRTOSTasks_TaskNotifyWait(pxCurrentTCB->ulNotifiedValue)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_NOTIFY_DISABLE))
-#define traceTASK_NOTIFY()                          EvrFreeRTOSTasks_TaskNotify(pxTCB, ulValue, eAction, pxTCB->ulNotifiedValue)
+  #define traceTASK_NOTIFY()                          EvrFreeRTOSTasks_TaskNotify(pxTCB, ulValue, eAction, pxTCB->ulNotifiedValue)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_NOTIFY_FROM_ISR_DISABLE))
-#define traceTASK_NOTIFY_FROM_ISR()                 EvrFreeRTOSTasks_TaskNotifyFromIsr(pxTCB, ulValue, eAction, pxTCB->ulNotifiedValue)
+  #define traceTASK_NOTIFY_FROM_ISR()                 EvrFreeRTOSTasks_TaskNotifyFromIsr(pxTCB, ulValue, eAction, pxTCB->ulNotifiedValue)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTASK_NOTIFY_GIVE_FROM_ISR_DISABLE))
-#define traceTASK_NOTIFY_GIVE_FROM_ISR()            EvrFreeRTOSTasks_TaskNotifyGiveFromIsr(pxTCB, pxTCB->ulNotifiedValue)
+  #define traceTASK_NOTIFY_GIVE_FROM_ISR()            EvrFreeRTOSTasks_TaskNotifyGiveFromIsr(pxTCB, pxTCB->ulNotifiedValue)
 #endif
 
 
 /* Queue */
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_CREATE_DISABLE))
-#define traceQUEUE_CREATE(px)                       EvrFreeRTOSQueue_QueueCreate(px)
+  #define traceQUEUE_CREATE(px)                       EvrFreeRTOSQueue_QueueCreate(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_CREATE_FAILED_DISABLE))
-#define traceQUEUE_CREATE_FAILED(uc)                EvrFreeRTOSQueue_QueueCreateFailed(uc)
+  #define traceQUEUE_CREATE_FAILED(uc)                EvrFreeRTOSQueue_QueueCreateFailed(uc)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceCREATE_MUTEX_DISABLE))
-#define traceCREATE_MUTEX(px)                       EvrFreeRTOSQueue_CreateMutex(px)
+  #define traceCREATE_MUTEX(px)                       EvrFreeRTOSQueue_CreateMutex(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceCREATE_MUTEX_FAILED_DISABLE))
-#define traceCREATE_MUTEX_FAILED()                  EvrFreeRTOSQueue_CreateMutexFailed()
+  #define traceCREATE_MUTEX_FAILED()                  EvrFreeRTOSQueue_CreateMutexFailed()
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceGIVE_MUTEX_RECURSIVE_DISABLE))
-#define traceGIVE_MUTEX_RECURSIVE(px)               EvrFreeRTOSQueue_GiveMutexRecursive(px)
+  #define traceGIVE_MUTEX_RECURSIVE(px)               EvrFreeRTOSQueue_GiveMutexRecursive(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceGIVE_MUTEX_RECURSIVE_FAILED_DISABLE))
-#define traceGIVE_MUTEX_RECURSIVE_FAILED(px)        EvrFreeRTOSQueue_GiveMutexRecursiveFailed(px)
+  #define traceGIVE_MUTEX_RECURSIVE_FAILED(px)        EvrFreeRTOSQueue_GiveMutexRecursiveFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTAKE_MUTEX_RECURSIVE_DISABLE))
-#define traceTAKE_MUTEX_RECURSIVE(px)               EvrFreeRTOSQueue_TakeMutexRecursive(px)
+  #define traceTAKE_MUTEX_RECURSIVE(px)               EvrFreeRTOSQueue_TakeMutexRecursive(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTAKE_MUTEX_RECURSIVE_FAILED_DISABLE))
-#define traceTAKE_MUTEX_RECURSIVE_FAILED(px)        EvrFreeRTOSQueue_TakeMutexRecursiveFailed(px)
+  #define traceTAKE_MUTEX_RECURSIVE_FAILED(px)        EvrFreeRTOSQueue_TakeMutexRecursiveFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceCREATE_COUNTING_SEMAPHORE_DISABLE))
-#define traceCREATE_COUNTING_SEMAPHORE()            EvrFreeRTOSQueue_CreateCountingSemaphore(xHandle)
+  #define traceCREATE_COUNTING_SEMAPHORE()            EvrFreeRTOSQueue_CreateCountingSemaphore(xHandle)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceCREATE_COUNTING_SEMAPHORE_FAILED_DISABLE))
-#define traceCREATE_COUNTING_SEMAPHORE_FAILED()     EvrFreeRTOSQueue_CreateCountingSemaphoreFailed()
+  #define traceCREATE_COUNTING_SEMAPHORE_FAILED()     EvrFreeRTOSQueue_CreateCountingSemaphoreFailed()
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_SEND_DISABLE))
-#define traceQUEUE_SEND(px)                         EvrFreeRTOSQueue_QueueSend(px)
+  #define traceQUEUE_SEND(px)                         EvrFreeRTOSQueue_QueueSend(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_SEND_FAILED_DISABLE))
-#define traceQUEUE_SEND_FAILED(px)                  EvrFreeRTOSQueue_QueueSendFailed(px)
+  #define traceQUEUE_SEND_FAILED(px)                  EvrFreeRTOSQueue_QueueSendFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_RECEIVE_DISABLE))
-#define traceQUEUE_RECEIVE(px)                      EvrFreeRTOSQueue_QueueReceive(px)
+  #define traceQUEUE_RECEIVE(px)                      EvrFreeRTOSQueue_QueueReceive(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_PEEK_DISABLE))
-#define traceQUEUE_PEEK(px)                         EvrFreeRTOSQueue_QueuePeek(px)
+  #define traceQUEUE_PEEK(px)                         EvrFreeRTOSQueue_QueuePeek(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_PEEK_DISABLE))
-#define traceQUEUE_PEEK_FAILED(px)                  EvrFreeRTOSQueue_QueuePeekFailed(px)
+  #define traceQUEUE_PEEK_FAILED(px)                  EvrFreeRTOSQueue_QueuePeekFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_PEEK_FROM_ISR_DISABLE))
-#define traceQUEUE_PEEK_FROM_ISR(px)                EvrFreeRTOSQueue_QueuePeekFromIsr(px)
+  #define traceQUEUE_PEEK_FROM_ISR(px)                EvrFreeRTOSQueue_QueuePeekFromIsr(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_RECEIVE_FAILED_DISABLE))
-#define traceQUEUE_RECEIVE_FAILED(px)               EvrFreeRTOSQueue_QueueReceiveFailed(px)
+  #define traceQUEUE_RECEIVE_FAILED(px)               EvrFreeRTOSQueue_QueueReceiveFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_SEND_FROM_ISR_DISABLE))
-#define traceQUEUE_SEND_FROM_ISR(px)                EvrFreeRTOSQueue_QueueSendFromIsr(px)
+  #define traceQUEUE_SEND_FROM_ISR(px)                EvrFreeRTOSQueue_QueueSendFromIsr(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_SEND_FROM_ISR_FAILED_DISABLE))
-#define traceQUEUE_SEND_FROM_ISR_FAILED(px)         EvrFreeRTOSQueue_QueueSendFromIsrFailed(px)
+  #define traceQUEUE_SEND_FROM_ISR_FAILED(px)         EvrFreeRTOSQueue_QueueSendFromIsrFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_RECEIVE_FROM_ISR_DISABLE))
-#define traceQUEUE_RECEIVE_FROM_ISR(px)             EvrFreeRTOSQueue_QueueReceiveFromIsr(px)
+  #define traceQUEUE_RECEIVE_FROM_ISR(px)             EvrFreeRTOSQueue_QueueReceiveFromIsr(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_RECEIVE_FROM_ISR_FAILED_DISABLE))
-#define traceQUEUE_RECEIVE_FROM_ISR_FAILED(px)      EvrFreeRTOSQueue_QueueReceiveFromIsrFailed(px)
+  #define traceQUEUE_RECEIVE_FROM_ISR_FAILED(px)      EvrFreeRTOSQueue_QueueReceiveFromIsrFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_PEEK_FROM_ISR_FAILED_DISABLE))
-#define traceQUEUE_PEEK_FROM_ISR_FAILED(px)         EvrFreeRTOSQueue_QueuePeekFromIsrFailed(px)
+  #define traceQUEUE_PEEK_FROM_ISR_FAILED(px)         EvrFreeRTOSQueue_QueuePeekFromIsrFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_DELETE_DISABLE))
-#define traceQUEUE_DELETE(px)                       EvrFreeRTOSQueue_QueueDelete(px)
+  #define traceQUEUE_DELETE(px)                       EvrFreeRTOSQueue_QueueDelete(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceQUEUE_REGISTRY_ADD_DISABLE))
-#define traceQUEUE_REGISTRY_ADD(px,pc)              EvrFreeRTOSQueue_QueueRegistryAdd(px,pc)
+  #define traceQUEUE_REGISTRY_ADD(px,pc)              EvrFreeRTOSQueue_QueueRegistryAdd(px,pc)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceBLOCKING_ON_QUEUE_RECEIVE_DISABLE))
-#define traceBLOCKING_ON_QUEUE_RECEIVE(px)          EvrFreeRTOSQueue_BlockingOnQueueReceive(px)
+  #define traceBLOCKING_ON_QUEUE_RECEIVE(px)          EvrFreeRTOSQueue_BlockingOnQueueReceive(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceBLOCKING_ON_QUEUE_SEND_DISABLE))
-#define traceBLOCKING_ON_QUEUE_SEND(px)             EvrFreeRTOSQueue_BlockingOnQueueSend(px)
+  #define traceBLOCKING_ON_QUEUE_SEND(px)             EvrFreeRTOSQueue_BlockingOnQueueSend(px)
 #endif
 
 
 /* Timers */
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTIMER_CREATE_DISABLE))
-#define traceTIMER_CREATE(px)                       EvrFreeRTOSTimers_TimerCreate(px)
+  #define traceTIMER_CREATE(px)                       EvrFreeRTOSTimers_TimerCreate(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTIMER_CREATE_FAILED_DISABLE))
-#define traceTIMER_CREATE_FAILED()                  EvrFreeRTOSTimers_TimerCreateFailed()
+  #define traceTIMER_CREATE_FAILED()                  EvrFreeRTOSTimers_TimerCreateFailed()
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTIMER_COMMAND_SEND_DISABLE))
-#define traceTIMER_COMMAND_SEND(pxT,xC,xO,xR)       EvrFreeRTOSTimers_TimerCommandSend(pxT,xC,xO,xR)
+  #define traceTIMER_COMMAND_SEND(pxT,xC,xO,xR)       EvrFreeRTOSTimers_TimerCommandSend(pxT,xC,xO,xR)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTIMER_COMMAND_RECEIVED_DISABLE))
-#define traceTIMER_COMMAND_RECEIVED(px,xC,xO)       EvrFreeRTOSTimers_TimerCommandReceived(px,xC,xO)
+  #define traceTIMER_COMMAND_RECEIVED(px,xC,xO)       EvrFreeRTOSTimers_TimerCommandReceived(px,xC,xO)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceTIMER_EXPIRED_DISABLE))
-#define traceTIMER_EXPIRED(px)                      EvrFreeRTOSTimers_TimerExpired(px)
+  #define traceTIMER_EXPIRED(px)                      EvrFreeRTOSTimers_TimerExpired(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(tracePEND_FUNC_CALL_DISABLE))
-#define tracePEND_FUNC_CALL(px,pv,ul,x)             EvrFreeRTOSTimers_PendFuncCall(px,pv,ul,x)
+  #define tracePEND_FUNC_CALL(px,pv,ul,x)             EvrFreeRTOSTimers_PendFuncCall(px,pv,ul,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(tracePEND_FUNC_CALL_FROM_ISR_DISABLE))
-#define tracePEND_FUNC_CALL_FROM_ISR(px,pv,ul,x)    EvrFreeRTOSTimers_PendFuncCallFromIsr(px,pv,ul,x)
+  #define tracePEND_FUNC_CALL_FROM_ISR(px,pv,ul,x)    EvrFreeRTOSTimers_PendFuncCallFromIsr(px,pv,ul,x)
 #endif
 
 
 /* Event Groups */
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_CREATE_DISABLE))
-#define traceEVENT_GROUP_CREATE(px)                 EvrFreeRTOSEventGroups_EventGroupCreate(px)
+  #define traceEVENT_GROUP_CREATE(px)                 EvrFreeRTOSEventGroups_EventGroupCreate(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_CREATE_FAILED_DISABLE))
-#define traceEVENT_GROUP_CREATE_FAILED()            EvrFreeRTOSEventGroups_EventGroupCreateFailed()
+  #define traceEVENT_GROUP_CREATE_FAILED()            EvrFreeRTOSEventGroups_EventGroupCreateFailed()
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_SYNC_BLOCK_DISABLE))
-#define traceEVENT_GROUP_SYNC_BLOCK(px,uxS,uxW)     EvrFreeRTOSEventGroups_EventGroupSyncBlock(px,uxS,uxW)
+  #define traceEVENT_GROUP_SYNC_BLOCK(px,uxS,uxW)     EvrFreeRTOSEventGroups_EventGroupSyncBlock(px,uxS,uxW)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_SYNC_END_DISABLE))
-#define traceEVENT_GROUP_SYNC_END(px,uxS,uxW,x)     EvrFreeRTOSEventGroups_EventGroupSyncEnd(px,uxS,uxW,x)
+  #define traceEVENT_GROUP_SYNC_END(px,uxS,uxW,x)     EvrFreeRTOSEventGroups_EventGroupSyncEnd(px,uxS,uxW,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_WAIT_BITS_BLOCK_DISABLE))
-#define traceEVENT_GROUP_WAIT_BITS_BLOCK(px,ux)     EvrFreeRTOSEventGroups_EventGroupWaitBitsBlock(px,ux)
+  #define traceEVENT_GROUP_WAIT_BITS_BLOCK(px,ux)     EvrFreeRTOSEventGroups_EventGroupWaitBitsBlock(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_WAIT_BITS_END_DISABLE))
-#define traceEVENT_GROUP_WAIT_BITS_END(px,ux,x)     EvrFreeRTOSEventGroups_EventGroupWaitBitsEnd(px,ux,x)
+  #define traceEVENT_GROUP_WAIT_BITS_END(px,ux,x)     EvrFreeRTOSEventGroups_EventGroupWaitBitsEnd(px,ux,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_CLEAR_BITS_DISABLE))
-#define traceEVENT_GROUP_CLEAR_BITS(px,ux)          EvrFreeRTOSEventGroups_EventGroupClearBits(px,ux)
+  #define traceEVENT_GROUP_CLEAR_BITS(px,ux)          EvrFreeRTOSEventGroups_EventGroupClearBits(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_CLEAR_BITS_FROM_ISR_DISABLE))
-#define traceEVENT_GROUP_CLEAR_BITS_FROM_ISR(px,ux) EvrFreeRTOSEventGroups_EventGroupClearBitsFromIsr(px,ux)
+  #define traceEVENT_GROUP_CLEAR_BITS_FROM_ISR(px,ux) EvrFreeRTOSEventGroups_EventGroupClearBitsFromIsr(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_SET_BITS_DISABLE))
-#define traceEVENT_GROUP_SET_BITS(px,ux)            EvrFreeRTOSEventGroups_EventGroupSetBits(px,ux)
+  #define traceEVENT_GROUP_SET_BITS(px,ux)            EvrFreeRTOSEventGroups_EventGroupSetBits(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_SET_BITS_FROM_ISR_DISABLE))
-#define traceEVENT_GROUP_SET_BITS_FROM_ISR(px,ux)   EvrFreeRTOSEventGroups_EventGroupSetBitsFromIsr(px,ux)
+  #define traceEVENT_GROUP_SET_BITS_FROM_ISR(px,ux)   EvrFreeRTOSEventGroups_EventGroupSetBitsFromIsr(px,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceEVENT_GROUP_DELETE_DISABLE))
-#define traceEVENT_GROUP_DELETE(px)                 EvrFreeRTOSEventGroups_EventGroupDelete(px)
+  #define traceEVENT_GROUP_DELETE(px)                 EvrFreeRTOSEventGroups_EventGroupDelete(px)
 #endif
 
 
 /* Stream Buffer */
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_CREATE_FAILED_DISABLE))
-#define traceSTREAM_BUFFER_CREATE_FAILED(ux)        EvrFreeRTOSStreamBuf_StreamBufferCreateFailed(ux)
+  #define traceSTREAM_BUFFER_CREATE_FAILED(ux)        EvrFreeRTOSStreamBuf_StreamBufferCreateFailed(ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_CREATE_STATIC_FAILED_DISABLE))
-#define traceSTREAM_BUFFER_CREATE_STATIC_FAILED(x,ux)  EvrFreeRTOSStreamBuf_StreamBufferCreateStaticFailed(x,ux)
+  #define traceSTREAM_BUFFER_CREATE_STATIC_FAILED(x,ux)  EvrFreeRTOSStreamBuf_StreamBufferCreateStaticFailed(x,ux)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_CREATE_DISABLE))
-#define traceSTREAM_BUFFER_CREATE(px,x)             EvrFreeRTOSStreamBuf_StreamBufferCreate(px,x)
+  #define traceSTREAM_BUFFER_CREATE(px,x)             EvrFreeRTOSStreamBuf_StreamBufferCreate(px,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_DELETE_DISABLE))
-#define traceSTREAM_BUFFER_DELETE(px)               EvrFreeRTOSStreamBuf_StreamBufferDelete(px)
+  #define traceSTREAM_BUFFER_DELETE(px)               EvrFreeRTOSStreamBuf_StreamBufferDelete(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_RESET_DISABLE))
-#define traceSTREAM_BUFFER_RESET(px)                EvrFreeRTOSStreamBuf_StreamBufferReset(px)
+  #define traceSTREAM_BUFFER_RESET(px)                EvrFreeRTOSStreamBuf_StreamBufferReset(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceBLOCKING_ON_STREAM_BUFFER_SEND_DISABLE))
-#define traceBLOCKING_ON_STREAM_BUFFER_SEND(px)     EvrFreeRTOSStreamBuf_StreamBufferBlockingOnSend(px)
+  #define traceBLOCKING_ON_STREAM_BUFFER_SEND(px)     EvrFreeRTOSStreamBuf_StreamBufferBlockingOnSend(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_SEND_DISABLE))
-#define traceSTREAM_BUFFER_SEND(px,x)               EvrFreeRTOSStreamBuf_StreamBufferSend(px,x)
+  #define traceSTREAM_BUFFER_SEND(px,x)               EvrFreeRTOSStreamBuf_StreamBufferSend(px,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_SEND_FAILED_DISABLE))
-#define traceSTREAM_BUFFER_SEND_FAILED(px)          EvrFreeRTOSStreamBuf_StreamBufferSendFailed(px)
+  #define traceSTREAM_BUFFER_SEND_FAILED(px)          EvrFreeRTOSStreamBuf_StreamBufferSendFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_SEND_FROM_ISR_DISABLE))
-#define traceSTREAM_BUFFER_SEND_FROM_ISR(px,x)      EvrFreeRTOSStreamBuf_StreamBufferSendFromIsr(px,x)
+  #define traceSTREAM_BUFFER_SEND_FROM_ISR(px,x)      EvrFreeRTOSStreamBuf_StreamBufferSendFromIsr(px,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceBLOCKING_ON_STREAM_BUFFER_RECEIVE_DISABLE))
-#define traceBLOCKING_ON_STREAM_BUFFER_RECEIVE(px)  EvrFreeRTOSStreamBuf_StreamBufferBlockingOnReceive(px)
+  #define traceBLOCKING_ON_STREAM_BUFFER_RECEIVE(px)  EvrFreeRTOSStreamBuf_StreamBufferBlockingOnReceive(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_RECEIVE_DISABLE))
-#define traceSTREAM_BUFFER_RECEIVE(px,x)            EvrFreeRTOSStreamBuf_StreamBufferReceive(px,x)
+  #define traceSTREAM_BUFFER_RECEIVE(px,x)            EvrFreeRTOSStreamBuf_StreamBufferReceive(px,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_RECEIVE_FAILED_DISABLE))
-#define traceSTREAM_BUFFER_RECEIVE_FAILED(px)       EvrFreeRTOSStreamBuf_StreamBufferReceiveFailed(px)
+  #define traceSTREAM_BUFFER_RECEIVE_FAILED(px)       EvrFreeRTOSStreamBuf_StreamBufferReceiveFailed(px)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceSTREAM_BUFFER_RECEIVE_FROM_ISR_DISABLE))
-#define traceSTREAM_BUFFER_RECEIVE_FROM_ISR(px,x)   EvrFreeRTOSStreamBuf_StreamBufferReceiveFromIsr(px,x)
+  #define traceSTREAM_BUFFER_RECEIVE_FROM_ISR(px,x)   EvrFreeRTOSStreamBuf_StreamBufferReceiveFromIsr(px,x)
 #endif
 
 
 /* Heap */
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceMALLOC_DISABLE))
-#define traceMALLOC(pv,x)                           EvrFreeRTOSHeap_Malloc(pv,x)
+  #define traceMALLOC(pv,x)                           EvrFreeRTOSHeap_Malloc(pv,x)
 #endif
 
 #if (!defined(EVR_FREERTOS_DISABLE) && !defined(traceFREE_DISABLE))
-#define traceFREE(pv,x)                             EvrFreeRTOSHeap_Free(pv,x)
+  #define traceFREE(pv,x)                             EvrFreeRTOSHeap_Free(pv,x)
 #endif
 
 

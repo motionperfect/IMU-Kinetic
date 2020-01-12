@@ -24,7 +24,7 @@ The following is an list of all CMSIS components that are available.
 |[Pack](http://arm-software.github.io/CMSIS_5/Pack/html/index.html)    | All Cortex-M, SecurCore, Cortex-A5/A7/A9 | Describes a delivery mechanism for software components, device parameters, and evaluation board support. It simplifies software re-use and product life-cycle management (PLM). |
 |[SVD](http://arm-software.github.io/CMSIS_5/SVD/html/index.html)      | All Cortex-M, SecurCore | Peripheral description of a device that can be used to create peripheral awareness in debuggers or CMSIS-Core header files.|
 |[DAP](http://arm-software.github.io/CMSIS_5/DAP/html/index.html)      | All Cortex | Firmware for a debug unit that interfaces to the CoreSight Debug Access Port. |
-|[Zone](http://arm-software.github.io/CMSIS_5/Zone/html/index.html)    | All Cortex-M | Defines methods to describe system resources and to partition these resources into multiple projects and execution areas. |
+|[Zone](http://arm-software.github.io/CMSIS_5/Zone/html/index.html)    | All Cortex | Defines methods to describe system resources and to partition these resources into multiple projects and execution areas. |
 
 ## Implemented Enhancements
  - CMSIS-Core-A, RTX5: implementation for Cortex-A5/A7/A9
@@ -34,16 +34,15 @@ The following is an list of all CMSIS components that are available.
  - CMSIS-NN: Bare metal Neural Network function library.
  - CMSIS-DAP v2: with WinUSB for faster communication and separate pipe for SWO support
  - Config Wizard extension: access enum’s for configuration information 
- - CMSIS-Pack: [Git workflow](https://arm-software.github.io/CMSIS_5/Pack/html/element_repository.html) via Eclipse menu *Window - Perferences - CMSIS Packs - Manage Local Repositories* and [MDK](http://www.keil.com/support/man/docs/uv4/uv4_ca_packinst_repo.htm)
- - CMSIS-Pack: [Flash algorithm via debugger](https://arm-software.github.io/CMSIS_5/Pack/html/pdsc_family_pg.html#element_flashinfo) as some TurstZone enable devices cannot execute RAM.
- 
+
 ## Further Planned Enhancements
- - CMSIS-Zone: resource management for multi-core and access protection - [see here for pre-release](https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/configuring-armv8-m-systems-with-cmsis-zone)
+ - CMSIS-Zone: management of complex system
  - CMSIS-Pack:
-   - System Description SDF Format: describe more complex debug topologies than with a Debug Description in a tool agnostic way
+   - System Description SDF Format: describe more complex debug topologies than with a Debug Description in a tool agnostic way
+   - Github based workflow: allows to develop software packs using github infra-structure
+   - Flash algorithm via debugger: Some TurstZone enable devices cannot execute RAM. Commands that allow flash programming will be added to Debug Description.
    - CPDSC project file format: allows project templates that are agnostic of an IDE
    - Minimize need for IDE specific settings: CMSIS-Pack supports IDE specific parameters. Analyze and minimize 
- - CMSIS-Build: command-line driven make system for CMSIS-Pack based projects (to support CI tests)
 
 For further details see also the [Slides of the Embedded World CMSIS Partner Meeting](https://github.com/ARM-software/CMSIS_5/blob/develop/CMSIS_EW2019.pdf).
 
@@ -136,3 +135,4 @@ In the spirit of openness we will be tagging issues with the following:
 - **duplicate** - This issue is already addressed elsewhere, see comment with provided references.
 
 - **Important Information** - We provide essential informations regarding planned or resolved major enhancements.
+

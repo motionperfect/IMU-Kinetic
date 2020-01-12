@@ -36,27 +36,24 @@
 static uint8_t PendST;
 
 // Setup OS Tick.
-__WEAK int32_t OS_Tick_Setup (uint32_t freq, IRQHandler_t handler)
-{
+__WEAK int32_t OS_Tick_Setup (uint32_t freq, IRQHandler_t handler) {
   uint32_t load;
   (void)handler;
 
-  if (freq == 0U)
-	{
-	  return (-1);
-	}
+  if (freq == 0U) {
+    return (-1);
+  }
 
   load = (SystemCoreClock / freq) - 1U;
-  if (load > 0x00FFFFFFU)
-	{
-	  return (-1);
-	}
+  if (load > 0x00FFFFFFU) {
+    return (-1);
+  }
 
-  NVIC_SetPriority (SysTick_IRQn, SYSTICK_IRQ_PRIORITY);
+  NVIC_SetPriority(SysTick_IRQn, SYSTICK_IRQ_PRIORITY);
 
-  SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk;
-  SysTick->LOAD = load;
-  SysTick->VAL = 0U;
+  SysTick->CTRL =  SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk;
+  SysTick->LOAD =  load;
+  SysTick->VAL  =  0U;
 
   PendST = 0U;
 
@@ -64,65 +61,55 @@ __WEAK int32_t OS_Tick_Setup (uint32_t freq, IRQHandler_t handler)
 }
 
 /// Enable OS Tick.
-__WEAK void OS_Tick_Enable (void)
-{
+__WEAK void OS_Tick_Enable (void) {
 
-  if (PendST != 0U)
-	{
-	  PendST = 0U;
-	  SCB->ICSR = SCB_ICSR_PENDSTSET_Msk;
-	}
+  if (PendST != 0U) {
+    PendST = 0U;
+    SCB->ICSR = SCB_ICSR_PENDSTSET_Msk;
+  }
 
-  SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+  SysTick->CTRL |=  SysTick_CTRL_ENABLE_Msk;
 }
 
 /// Disable OS Tick.
-__WEAK void OS_Tick_Disable (void)
-{
+__WEAK void OS_Tick_Disable (void) {
 
   SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
 
-  if ((SCB->ICSR & SCB_ICSR_PENDSTSET_Msk) != 0U)
-	{
-	  SCB->ICSR = SCB_ICSR_PENDSTCLR_Msk;
-	  PendST = 1U;
-	}
+  if ((SCB->ICSR & SCB_ICSR_PENDSTSET_Msk) != 0U) {
+    SCB->ICSR = SCB_ICSR_PENDSTCLR_Msk;
+    PendST = 1U;
+  }
 }
 
 // Acknowledge OS Tick IRQ.
-__WEAK void OS_Tick_AcknowledgeIRQ (void)
-{
+__WEAK void OS_Tick_AcknowledgeIRQ (void) {
   (void)SysTick->CTRL;
 }
 
 // Get OS Tick IRQ number.
-__WEAK int32_t OS_Tick_GetIRQn (void)
-{
+__WEAK int32_t  OS_Tick_GetIRQn (void) {
   return ((int32_t)SysTick_IRQn);
 }
 
 // Get OS Tick clock.
-__WEAK uint32_t OS_Tick_GetClock (void)
-{
+__WEAK uint32_t OS_Tick_GetClock (void) {
   return (SystemCoreClock);
 }
 
 // Get OS Tick interval.
-__WEAK uint32_t OS_Tick_GetInterval (void)
-{
+__WEAK uint32_t OS_Tick_GetInterval (void) {
   return (SysTick->LOAD + 1U);
 }
 
 // Get OS Tick count value.
-__WEAK uint32_t OS_Tick_GetCount (void)
-{
+__WEAK uint32_t OS_Tick_GetCount (void) {
   uint32_t load = SysTick->LOAD;
-  return (load - SysTick->VAL);
+  return  (load - SysTick->VAL);
 }
 
 // Get OS Tick overflow status.
-__WEAK uint32_t OS_Tick_GetOverflow (void)
-{
+__WEAK uint32_t OS_Tick_GetOverflow (void) {
   return ((SysTick->CTRL >> 16) & 1U);
 }
 
