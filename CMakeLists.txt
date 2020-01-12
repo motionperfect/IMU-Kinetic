@@ -5,7 +5,7 @@ project(MotionPerfect C ASM)
 # source
 ######################################
 # C sources
-file(GLOB_RECURSE C_SOURCES "Middlewares/Third_Party/FreeRTOS/Source/*.c"
+file(GLOB_RECURSE C_SOURCES "Middlewares/Third_Party/FreeRTOS/*.c"
         "Middlewares/Third_Party/Printf/*.c"
         "Drivers/CMSIS_5/CMSIS/RTOS2/FreeRTOS/Source/*.c"
         "Drivers/CMSIS_5/Device/ST/STM32L4xx/Source/*.c"

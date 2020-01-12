@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.0.1
- * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.2.1
+ * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -40,11 +40,11 @@ task.h is included from an application file. */
 #include "timers.h"
 #include "stack_macros.h"
 
-/* Lint e961 and e750 are suppressed as a MISRA exception justified because the
-MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined for the
-header files above, but not in this file, in order to generate the correct
-privileged Vs unprivileged linkage and placement. */
-#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750. */
+/* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
+because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
+for the header files above, but not in this file, in order to generate the
+correct privileged Vs unprivileged linkage and placement. */
+#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
 
 /* Set configUSE_STATS_FORMATTING_FUNCTIONS to 2 to include the stats formatting
 functions but without including stdio.h here. */
@@ -57,9 +57,9 @@ functions but without including stdio.h here. */
 #endif /* configUSE_STATS_FORMATTING_FUNCTIONS == 1 ) */
 
 #if(configUSE_PREEMPTION == 0)
-/* If the cooperative scheduler is being used then a yield should not be
+																														/* If the cooperative scheduler is being used then a yield should not be
 	performed just because a higher priority task has been woken. */
-#define taskYIELD_IF_USING_PREEMPTION()
+	#define taskYIELD_IF_USING_PREEMPTION()
 #else
 #define taskYIELD_IF_USING_PREEMPTION() portYIELD_WITHIN_API()
 #endif
@@ -75,24 +75,7 @@ functions but without including stdio.h here. */
  */
 #define tskSTACK_FILL_BYTE    ( 0xa5U )
 
-/* Sometimes the FreeRTOSConfig.h settings only allow a task to be created using
-dynamically allocated RAM, in which case when any task is deleted it is known
-that both the task's stack and TCB need to be freed.  Sometimes the
-FreeRTOSConfig.h settings only allow a task to be created using statically
-allocated RAM, in which case when any task is deleted it is known that neither
-the task's stack or TCB should be freed.  Sometimes the FreeRTOSConfig.h
-settings allow a task to be created using either statically or dynamically
-allocated RAM, in which case a member of the TCB is used to record whether the
-stack and/or TCB were allocated statically or dynamically, so when a task is
-deleted the RAM that was allocated dynamically is freed again and no attempt is
-made to free the RAM that was allocated statically.
-tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE is only true if it is possible for a
-task to be created using either statically or dynamically allocated RAM.  Note
-that if portUSING_MPU_WRAPPERS is 1 then a protected task can be created with
-a statically allocated stack and a dynamically allocated TCB.
-!!!NOTE!!! If the definition of tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE is
-changed then the definition of StaticTask_t must also be updated. */
-#define tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE    ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
+/* Bits used to recored how a task's stack and TCB were allocated. */
 #define tskDYNAMICALLY_ALLOCATED_STACK_AND_TCB        ( ( uint8_t ) 0 )
 #define tskSTATICALLY_ALLOCATED_STACK_ONLY            ( ( uint8_t ) 1 )
 #define tskSTATICALLY_ALLOCATED_STACK_AND_TCB        ( ( uint8_t ) 2 )
@@ -100,7 +83,7 @@ changed then the definition of StaticTask_t must also be updated. */
 /* If any of the following are set then task stacks are filled with a known
 value so the high water mark can be determined.  If none of the following are
 set then don't fill the stack so there is no unnecessary dependency on memset. */
-#if((configCHECK_FOR_STACK_OVERFLOW > 1) || (configUSE_TRACE_FACILITY == 1) || (INCLUDE_uxTaskGetStackHighWaterMark == 1))
+#if((configCHECK_FOR_STACK_OVERFLOW > 1) || (configUSE_TRACE_FACILITY == 1) || (INCLUDE_uxTaskGetStackHighWaterMark == 1) || (INCLUDE_uxTaskGetStackHighWaterMark2 == 1))
 #define tskSET_NEW_STACKS_TO_KNOWN_VALUE    1
 #else
 #define tskSET_NEW_STACKS_TO_KNOWN_VALUE	0
@@ -131,80 +114,80 @@ configIDLE_TASK_NAME in FreeRTOSConfig.h. */
 
 #if (configUSE_PORT_OPTIMISED_TASK_SELECTION == 0)
 
-/* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
+																														/* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
 	performed in a generic way that is not optimised to any particular
 	microcontroller architecture. */
 
-/* uxTopReadyPriority holds the priority of the highest priority ready
+	/* uxTopReadyPriority holds the priority of the highest priority ready
 	state task. */
-#define taskRECORD_READY_PRIORITY(uxPriority)                                                        \
-    {                                                                                                    \
-        if( ( uxPriority ) > uxTopReadyPriority )                                                        \
-        {                                                                                                \
-            uxTopReadyPriority = ( uxPriority );                                                        \
-        }                                                                                                \
-    } /* taskRECORD_READY_PRIORITY */
+	#define taskRECORD_READY_PRIORITY( uxPriority )														\
+	{																									\
+		if( ( uxPriority ) > uxTopReadyPriority )														\
+		{																								\
+			uxTopReadyPriority = ( uxPriority );														\
+		}																								\
+	} /* taskRECORD_READY_PRIORITY */
 
-/*-----------------------------------------------------------*/
+	/*-----------------------------------------------------------*/
 
-#define taskSELECT_HIGHEST_PRIORITY_TASK()                                                            \
-    {                                                                                                    \
-    UBaseType_t uxTopPriority = uxTopReadyPriority;                                                        \
-                                                                                                        \
-        /* Find the highest priority queue that contains ready tasks. */                                \
-        while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) )                            \
-        {                                                                                                \
-            configASSERT( uxTopPriority );                                                                \
-            --uxTopPriority;                                                                            \
-        }                                                                                                \
-                                                                                                        \
-        /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of						\
-		the	same priority get an equal share of the processor time. */                                    \
-        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );            \
-        uxTopReadyPriority = uxTopPriority;                                                                \
-    } /* taskSELECT_HIGHEST_PRIORITY_TASK */
+	#define taskSELECT_HIGHEST_PRIORITY_TASK()															\
+	{																									\
+	UBaseType_t uxTopPriority = uxTopReadyPriority;														\
+																										\
+		/* Find the highest priority queue that contains ready tasks. */								\
+		while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) )							\
+		{																								\
+			configASSERT( uxTopPriority );																\
+			--uxTopPriority;																			\
+		}																								\
+																										\
+		/* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks of						\
+		the	same priority get an equal share of the processor time. */									\
+		listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );			\
+		uxTopReadyPriority = uxTopPriority;																\
+	} /* taskSELECT_HIGHEST_PRIORITY_TASK */
 
-/*-----------------------------------------------------------*/
+	/*-----------------------------------------------------------*/
 
-/* Define away taskRESET_READY_PRIORITY() and portRESET_READY_PRIORITY() as
+	/* Define away taskRESET_READY_PRIORITY() and portRESET_READY_PRIORITY() as
 	they are only required when a port optimised method of task selection is
 	being used. */
-#define taskRESET_READY_PRIORITY(uxPriority)
-#define portRESET_READY_PRIORITY(uxPriority, uxTopReadyPriority)
+	#define taskRESET_READY_PRIORITY( uxPriority )
+	#define portRESET_READY_PRIORITY( uxPriority, uxTopReadyPriority )
 
 #else /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
-																														/* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 1 then task selection is
+/* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 1 then task selection is
 	performed in a way that is tailored to the particular microcontroller
 	architecture being used. */
 
-	/* A port optimised version is provided.  Call the port defined macros. */
-	#define taskRECORD_READY_PRIORITY( uxPriority )	portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
+/* A port optimised version is provided.  Call the port defined macros. */
+#define taskRECORD_READY_PRIORITY(uxPriority)    portRECORD_READY_PRIORITY( uxPriority, uxTopReadyPriority )
 
-	/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
 
-	#define taskSELECT_HIGHEST_PRIORITY_TASK()														\
-	{																								\
-	UBaseType_t uxTopPriority;																		\
-																									\
-		/* Find the highest priority list that contains ready tasks. */								\
-		portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );								\
-		configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );		\
-		listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );		\
-	} /* taskSELECT_HIGHEST_PRIORITY_TASK() */
+#define taskSELECT_HIGHEST_PRIORITY_TASK()                                                        \
+    {                                                                                                \
+    UBaseType_t uxTopPriority;                                                                        \
+                                                                                                    \
+        /* Find the highest priority list that contains ready tasks. */                                \
+        portGET_HIGHEST_PRIORITY( uxTopPriority, uxTopReadyPriority );                                \
+        configASSERT( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ uxTopPriority ] ) ) > 0 );        \
+        listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopPriority ] ) );        \
+    } /* taskSELECT_HIGHEST_PRIORITY_TASK() */
 
-	/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
 
-	/* A port optimised version is provided, call it only if the TCB being reset
-	is being referenced from a ready list.  If it is referenced from a delayed
-	or suspended list then it won't be in a ready list. */
-	#define taskRESET_READY_PRIORITY( uxPriority )														\
-	{																									\
-		if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ ( uxPriority ) ] ) ) == ( UBaseType_t ) 0 )	\
-		{																								\
-			portRESET_READY_PRIORITY( ( uxPriority ), ( uxTopReadyPriority ) );							\
-		}																								\
-	}
+/* A port optimised version is provided, call it only if the TCB being reset
+is being referenced from a ready list.  If it is referenced from a delayed
+or suspended list then it won't be in a ready list. */
+#define taskRESET_READY_PRIORITY(uxPriority)                                                        \
+    {                                                                                                    \
+        if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ ( uxPriority ) ] ) ) == ( UBaseType_t ) 0 )    \
+        {                                                                                                \
+            portRESET_READY_PRIORITY( ( uxPriority ), ( uxTopReadyPriority ) );                            \
+        }                                                                                                \
+    }
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
@@ -245,7 +228,7 @@ count overflows. */
  * task should be used in place of the parameter.  This macro simply checks to
  * see if the parameter is NULL and returns a pointer to the appropriate TCB.
  */
-#define prvGetTCBFromHandle(pxHandle) ( ( ( pxHandle ) == NULL ) ? ( TCB_t * ) pxCurrentTCB : ( TCB_t * ) ( pxHandle ) )
+#define prvGetTCBFromHandle(pxHandle) ( ( ( pxHandle ) == NULL ) ? pxCurrentTCB : ( pxHandle ) )
 
 /* The item value of the event list item is normally used to hold the priority
 of the task to which it belongs (coded to allow it to be held in reverse
@@ -266,7 +249,8 @@ to its original value when it is released. */
  * and stores task state information, including a pointer to the task's context
  * (the task's run time environment, including register values)
  */
-typedef struct tskTaskControlBlock {
+typedef struct tskTaskControlBlock            /* The old naming convention is used to prevent breaking kernel aware debuggers. */
+{
   volatile StackType_t *pxTopOfStack;    /*< Points to the location of the last item placed on the tasks stack.  THIS MUST BE THE FIRST MEMBER OF THE TCB STRUCT. */
 
   #if (portUSING_MPU_WRAPPERS == 1)
@@ -325,14 +309,18 @@ typedef struct tskTaskControlBlock {
   volatile uint8_t ucNotifyState;
   #endif
 
-  /* See the comments above the definition of
+  /* See the comments in FreeRTOS.h with the definition of
 	tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE. */
-  #if(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e731 Macro has been consolidated for readability reasons. */
+  #if(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e731 !e9029 Macro has been consolidated for readability reasons. */
   uint8_t ucStaticallyAllocated;        /*< Set to pdTRUE if the task is a statically allocated to ensure no attempt is made to free the memory. */
   #endif
 
   #if(INCLUDE_xTaskAbortDelay == 1)
   uint8_t ucDelayAborted;
+  #endif
+
+  #if(configUSE_POSIX_ERRNO == 1)
+  int iTaskErrno;
   #endif
 
 } tskTCB;
@@ -343,34 +331,36 @@ typedef tskTCB TCB_t;
 
 /*lint -save -e956 A manual analysis and inspection has been used to determine
 which static variables must be declared volatile. */
-
 PRIVILEGED_DATA TCB_t *volatile pxCurrentTCB = NULL;
 
-/* Lists for ready and blocked tasks. --------------------*/
-PRIVILEGED_DATA static List_t pxReadyTasksLists[configMAX_PRIORITIES] = {
-	0};    /*< Prioritised ready tasks. */
-PRIVILEGED_DATA static List_t xDelayedTaskList1 = {
-	0};                                /*< Delayed tasks. */
-PRIVILEGED_DATA static List_t xDelayedTaskList2 = {
-	0};                                /*< Delayed tasks (two lists are used - one for delays that have overflowed the current tick count. */
-PRIVILEGED_DATA static List_t *volatile pxDelayedTaskList = NULL;                    /*< Points to the delayed task list currently being used. */
-PRIVILEGED_DATA static List_t *volatile pxOverflowDelayedTaskList = NULL;            /*< Points to the delayed task list currently being used to hold tasks that have overflowed the current tick count. */
-PRIVILEGED_DATA static List_t xPendingReadyList = {
-	0};                                /*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
+/* Lists for ready and blocked tasks. --------------------
+xDelayedTaskList1 and xDelayedTaskList2 could be move to function scople but
+doing so breaks some kernel aware debuggers and debuggers that rely on removing
+the static qualifier. */
+PRIVILEGED_DATA static List_t pxReadyTasksLists[configMAX_PRIORITIES];/*< Prioritised ready tasks. */
+PRIVILEGED_DATA static List_t xDelayedTaskList1;                        /*< Delayed tasks. */
+PRIVILEGED_DATA static List_t xDelayedTaskList2;                        /*< Delayed tasks (two lists are used - one for delays that have overflowed the current tick count. */
+PRIVILEGED_DATA static List_t *volatile pxDelayedTaskList;                /*< Points to the delayed task list currently being used. */
+PRIVILEGED_DATA static List_t *volatile pxOverflowDelayedTaskList;        /*< Points to the delayed task list currently being used to hold tasks that have overflowed the current tick count. */
+PRIVILEGED_DATA static List_t xPendingReadyList;                        /*< Tasks that have been readied while the scheduler was suspended.  They will be moved to the ready list when the scheduler is resumed. */
 
 #if(INCLUDE_vTaskDelete == 1)
 
-PRIVILEGED_DATA static List_t xTasksWaitingTermination = {
-	0};                    /*< Tasks that have been deleted - but their memory not yet freed. */
+PRIVILEGED_DATA static List_t xTasksWaitingTermination;                /*< Tasks that have been deleted - but their memory not yet freed. */
 PRIVILEGED_DATA static volatile UBaseType_t uxDeletedTasksWaitingCleanUp = (UBaseType_t)0U;
 
 #endif
 
 #if (INCLUDE_vTaskSuspend == 1)
 
-PRIVILEGED_DATA static List_t xSuspendedTaskList = {
-	0};                        /*< Tasks that are currently suspended. */
+PRIVILEGED_DATA static List_t xSuspendedTaskList;                    /*< Tasks that are currently suspended. */
 
+#endif
+
+/* Global POSIX errno. Its value is changed upon context switching to match
+the errno of the currently running task. */
+#if (configUSE_POSIX_ERRNO == 1)
+int FreeRTOS_errno = 0;
 #endif
 
 /* Other file private variables. --------------------------------*/
@@ -397,7 +387,9 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = (UBaseType_t)
 
 #if (configGENERATE_RUN_TIME_STATS == 1)
 
-																														PRIVILEGED_DATA static uint32_t ulTaskSwitchedInTime = 0UL;	/*< Holds the value of a timer/counter the last time a task was switched in. */
+																														/* Do not move these variables to function scope as doing so prevents the
+	code working with debuggers that need to remove the static qualifier. */
+	PRIVILEGED_DATA static uint32_t ulTaskSwitchedInTime = 0UL;	/*< Holds the value of a timer/counter the last time a task was switched in. */
 	PRIVILEGED_DATA static uint32_t ulTotalRunTime = 0UL;		/*< Holds the total amount of execution time as defined by the run time counter clock. */
 
 #endif
@@ -408,17 +400,22 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended = (UBaseType_t)
 
 /* Callback function prototypes. --------------------------*/
 #if(configCHECK_FOR_STACK_OVERFLOW > 0)
-extern void
-vApplicationStackOverflowHook (TaskHandle_t xTask, char *pcTaskName);
+
+extern void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName );
+
 #endif
 
 #if(configUSE_TICK_HOOK > 0)
-extern void vApplicationTickHook( void );
+
+extern void vApplicationTickHook( void ); /*lint !e526 Symbol not defined as it is an application callback. */
+
 #endif
 
 #if(configSUPPORT_STATIC_ALLOCATION == 1)
+
 extern void
-vApplicationGetIdleTaskMemory (StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize);
+vApplicationGetIdleTaskMemory (StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize); /*lint !e526 Symbol not defined as it is an application callback. */
+
 #endif
 
 /* File private functions. --------------------------------*/
@@ -511,9 +508,9 @@ static TCB_t *prvSearchForNameWithinSingleList( List_t *pxList, const char pcNam
  * This function determines the 'high water mark' of the task stack by
  * determining how much of the stack remains at the original preset value.
  */
-#if ((configUSE_TRACE_FACILITY == 1) || (INCLUDE_uxTaskGetStackHighWaterMark == 1))
+#if ((configUSE_TRACE_FACILITY == 1) || (INCLUDE_uxTaskGetStackHighWaterMark == 1) || (INCLUDE_uxTaskGetStackHighWaterMark2 == 1))
 
-static uint16_t
+static configSTACK_DEPTH_TYPE
 prvTaskCheckFreeStackSpace (const uint8_t *pucStackByte) PRIVILEGED_FUNCTION;
 
 #endif
@@ -529,7 +526,7 @@ prvTaskCheckFreeStackSpace (const uint8_t *pucStackByte) PRIVILEGED_FUNCTION;
  */
 #if (configUSE_TICKLESS_IDLE != 0)
 
-static TickType_t prvGetExpectedIdleTime( void ) PRIVILEGED_FUNCTION;
+static TickType_t prvGetExpectedIdleTime (void) PRIVILEGED_FUNCTION;
 
 #endif
 
@@ -604,6 +601,7 @@ TaskHandle_t xTaskCreateStatic (TaskFunction_t pxTaskCode,
 			structure. */
 	volatile size_t xSize = sizeof (StaticTask_t);
 	configASSERT(xSize == sizeof (TCB_t));
+	(void)xSize; /* Prevent lint warning when configASSERT() is not used. */
   }
   #endif /* configASSERT_DEFINED */
 
@@ -611,16 +609,16 @@ TaskHandle_t xTaskCreateStatic (TaskFunction_t pxTaskCode,
 	{
 	  /* The memory used for the task's TCB and stack are passed into this
 			function - use them. */
-	  pxNewTCB = (TCB_t *)pxTaskBuffer; /*lint !e740 Unusual cast is ok as the structures are designed to have the same alignment, and the size is checked by an assert. */
+	  pxNewTCB = (TCB_t *)pxTaskBuffer; /*lint !e740 !e9087 Unusual cast is ok as the structures are designed to have the same alignment, and the size is checked by an assert. */
 	  pxNewTCB->pxStack = (StackType_t *)puxStackBuffer;
 
-	  #if(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e731 Macro has been consolidated for readability reasons. */
+	  #if(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e731 !e9029 Macro has been consolidated for readability reasons. */
 	  {
 		/* Tasks can be created statically or dynamically, so note this
 				task was created statically in case the task is later deleted. */
 		pxNewTCB->ucStaticallyAllocated = tskSTATICALLY_ALLOCATED_STACK_AND_TCB;
 	  }
-	  #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+	  #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
 	  prvInitialiseNewTask (pxTaskCode, pcName, ulStackDepth, pvParameters, uxPriority, &xReturn, pxNewTCB, NULL);
 	  prvAddNewTaskToReadyList (pxNewTCB);
@@ -662,7 +660,7 @@ TaskHandle_t xTaskCreateStatic (TaskFunction_t pxTaskCode,
 				task was created statically in case the task is later deleted. */
 				pxNewTCB->ucStaticallyAllocated = tskSTATICALLY_ALLOCATED_STACK_AND_TCB;
 			}
-			#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+			#endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
 			prvInitialiseNewTask(	pxTaskDefinition->pvTaskCode,
 									pxTaskDefinition->pcName,
@@ -703,14 +701,14 @@ TaskHandle_t xTaskCreateStatic (TaskFunction_t pxTaskCode,
 				/* Store the stack location in the TCB. */
 				pxNewTCB->pxStack = pxTaskDefinition->puxStackBuffer;
 
-				#if( configSUPPORT_STATIC_ALLOCATION == 1 )
+				#if( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
 				{
 					/* Tasks can be created statically or dynamically, so note
 					this task had a statically allocated stack in case it is
 					later deleted.  The TCB was allocated dynamically. */
 					pxNewTCB->ucStaticallyAllocated = tskSTATICALLY_ALLOCATED_STACK_ONLY;
 				}
-				#endif
+				#endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
 				prvInitialiseNewTask(	pxTaskDefinition->pvTaskCode,
 										pxTaskDefinition->pcName,
@@ -773,13 +771,13 @@ BaseType_t xTaskCreate (TaskFunction_t pxTaskCode,
 	StackType_t *pxStack;
 
 	/* Allocate space for the stack used by the task being created. */
-	pxStack = (StackType_t *)pvPortMalloc ((((size_t)usStackDepth)
-											* sizeof (StackType_t))); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+	pxStack = pvPortMalloc ((((size_t)usStackDepth)
+							 * sizeof (StackType_t))); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation is the stack. */
 
 	if (pxStack != NULL)
 	  {
 		/* Allocate space for the TCB. */
-		pxNewTCB = (TCB_t *)pvPortMalloc (sizeof (TCB_t)); /*lint !e961 MISRA exception as the casts are only redundant for some paths. */
+		pxNewTCB = (TCB_t *)pvPortMalloc (sizeof (TCB_t)); /*lint !e9087 !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack, and the first member of TCB_t is always a pointer to the task's stack. */
 
 		if (pxNewTCB != NULL)
 		  {
@@ -802,13 +800,13 @@ BaseType_t xTaskCreate (TaskFunction_t pxTaskCode,
 
   if (pxNewTCB != NULL)
 	{
-	  #if(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e731 Macro has been consolidated for readability reasons. */
+	  #if(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e9029 !e731 Macro has been consolidated for readability reasons. */
 	  {
 		/* Tasks can be created statically or dynamically, so note this
 				task was created dynamically in case it is later deleted. */
 		pxNewTCB->ucStaticallyAllocated = tskDYNAMICALLY_ALLOCATED_STACK_AND_TCB;
 	  }
-	  #endif /* configSUPPORT_STATIC_ALLOCATION */
+	  #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
 	  prvInitialiseNewTask (pxTaskCode, pcName, (uint32_t)usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL);
 	  prvAddNewTaskToReadyList (pxNewTCB);
@@ -866,9 +864,9 @@ static void prvInitialiseNewTask (TaskFunction_t pxTaskCode,
 	by the port. */
   #if(portSTACK_GROWTH < 0)
   {
-	pxTopOfStack = pxNewTCB->pxStack + (ulStackDepth - (uint32_t)1);
+	pxTopOfStack = &(pxNewTCB->pxStack[ulStackDepth - (uint32_t)1]);
 	pxTopOfStack = (StackType_t *)(((portPOINTER_SIZE_TYPE)pxTopOfStack)
-								   & (~((portPOINTER_SIZE_TYPE)portBYTE_ALIGNMENT_MASK))); /*lint !e923 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type. */
+								   & (~((portPOINTER_SIZE_TYPE)portBYTE_ALIGNMENT_MASK))); /*lint !e923 !e9033 !e9078 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type.  Checked by assert(). */
 
 	/* Check the alignment of the calculated top of stack is correct. */
 	configASSERT((((portPOINTER_SIZE_TYPE)pxTopOfStack
@@ -896,26 +894,35 @@ static void prvInitialiseNewTask (TaskFunction_t pxTaskCode,
   #endif /* portSTACK_GROWTH */
 
   /* Store the task name in the TCB. */
-  for (x = (UBaseType_t)0; x < (UBaseType_t)configMAX_TASK_NAME_LEN; x++)
+  if (pcName != NULL)
 	{
-	  pxNewTCB->pcTaskName[x] = pcName[x];
+	  for (x = (UBaseType_t)0; x < (UBaseType_t)configMAX_TASK_NAME_LEN; x++)
+		{
+		  pxNewTCB->pcTaskName[x] = pcName[x];
 
-	  /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
-		configMAX_TASK_NAME_LEN characters just in case the memory after the
-		string is not accessible (extremely unlikely). */
-	  if (pcName[x] == 0x00)
-		{
-		  break;
+		  /* Don't copy all configMAX_TASK_NAME_LEN if the string is shorter than
+			configMAX_TASK_NAME_LEN characters just in case the memory after the
+			string is not accessible (extremely unlikely). */
+		  if (pcName[x] == (char)0x00)
+			{
+			  break;
+			}
+		  else
+			{
+			  mtCOVERAGE_TEST_MARKER();
+			}
 		}
-	  else
-		{
-		  mtCOVERAGE_TEST_MARKER();
-		}
+
+	  /* Ensure the name string is terminated in the case that the string length
+		was greater or equal to configMAX_TASK_NAME_LEN. */
+	  pxNewTCB->pcTaskName[configMAX_TASK_NAME_LEN - 1] = '\0';
 	}
-
-  /* Ensure the name string is terminated in the case that the string length
-	was greater or equal to configMAX_TASK_NAME_LEN. */
-  pxNewTCB->pcTaskName[configMAX_TASK_NAME_LEN - 1] = '\0';
+  else
+	{
+	  /* The task has not been given a name, so just ensure there is a NULL
+		terminator when it is read out. */
+	  pxNewTCB->pcTaskName[0] = 0x00;
+	}
 
   /* This is used as an array index so must ensure it's not too large.  First
 	remove the privilege bit if one is present. */
@@ -1013,15 +1020,53 @@ static void prvInitialiseNewTask (TaskFunction_t pxTaskCode,
 	the top of stack variable is updated. */
   #if(portUSING_MPU_WRAPPERS == 1)
 																														  {
-		pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters, xRunPrivileged );
+		/* If the port has capability to detect stack overflow,
+		pass the stack end address to the stack initialization
+		function as well. */
+		#if( portHAS_STACK_OVERFLOW_CHECKING == 1 )
+		{
+			#if( portSTACK_GROWTH < 0 )
+			{
+				pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxNewTCB->pxStack, pxTaskCode, pvParameters, xRunPrivileged );
+			}
+			#else /* portSTACK_GROWTH */
+			{
+				pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxNewTCB->pxEndOfStack, pxTaskCode, pvParameters, xRunPrivileged );
+			}
+			#endif /* portSTACK_GROWTH */
+		}
+		#else /* portHAS_STACK_OVERFLOW_CHECKING */
+		{
+			pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxTaskCode, pvParameters, xRunPrivileged );
+		}
+		#endif /* portHAS_STACK_OVERFLOW_CHECKING */
 	}
   #else /* portUSING_MPU_WRAPPERS */
   {
-	pxNewTCB->pxTopOfStack = pxPortInitialiseStack (pxTopOfStack, pxTaskCode, pvParameters);
+	/* If the port has capability to detect stack overflow,
+		pass the stack end address to the stack initialization
+		function as well. */
+	#if(portHAS_STACK_OVERFLOW_CHECKING == 1)
+																															{
+			#if( portSTACK_GROWTH < 0 )
+			{
+				pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxNewTCB->pxStack, pxTaskCode, pvParameters );
+			}
+			#else /* portSTACK_GROWTH */
+			{
+				pxNewTCB->pxTopOfStack = pxPortInitialiseStack( pxTopOfStack, pxNewTCB->pxEndOfStack, pxTaskCode, pvParameters );
+			}
+			#endif /* portSTACK_GROWTH */
+		}
+	#else /* portHAS_STACK_OVERFLOW_CHECKING */
+	{
+	  pxNewTCB->pxTopOfStack = pxPortInitialiseStack (pxTopOfStack, pxTaskCode, pvParameters);
+	}
+	#endif /* portHAS_STACK_OVERFLOW_CHECKING */
   }
   #endif /* portUSING_MPU_WRAPPERS */
 
-  if ((void *)pxCreatedTask != NULL)
+  if (pxCreatedTask != NULL)
 	{
 	  /* Pass the handle out in an anonymous way.  The handle can be used to
 		change the created task's priority, delete the created task, etc.*/
@@ -1341,13 +1386,13 @@ void vTaskDelay (const TickType_t xTicksToDelay)
 #endif /* INCLUDE_vTaskDelay */
 /*-----------------------------------------------------------*/
 
-#if((INCLUDE_eTaskGetState == 1) || (configUSE_TRACE_FACILITY == 1))
+#if((INCLUDE_eTaskGetState == 1) || (configUSE_TRACE_FACILITY == 1) || (INCLUDE_xTaskAbortDelay == 1))
 
 eTaskState eTaskGetState (TaskHandle_t xTask)
 {
   eTaskState eReturn;
-  List_t *pxStateList;
-  const TCB_t *const pxTCB = (TCB_t *)xTask;
+  List_t const *pxStateList, *pxDelayedList, *pxOverflowedDelayedList;
+  const TCB_t *const pxTCB = xTask;
 
   configASSERT(pxTCB);
 
@@ -1360,12 +1405,14 @@ eTaskState eTaskGetState (TaskHandle_t xTask)
 	{
 	  taskENTER_CRITICAL();
 	  {
-		pxStateList = (List_t *)listLIST_ITEM_CONTAINER(&(pxTCB->xStateListItem));
+		pxStateList = listLIST_ITEM_CONTAINER(&(pxTCB->xStateListItem));
+		pxDelayedList = pxDelayedTaskList;
+		pxOverflowedDelayedList = pxOverflowDelayedTaskList;
 	  }
 	  taskEXIT_CRITICAL();
 
-	  if ((pxStateList == pxDelayedTaskList)
-		  || (pxStateList == pxOverflowDelayedTaskList))
+	  if ((pxStateList == pxDelayedList)
+		  || (pxStateList == pxOverflowedDelayedList))
 		{
 		  /* The task being queried is referenced from one of the Blocked
 				lists. */
@@ -1376,11 +1423,30 @@ eTaskState eTaskGetState (TaskHandle_t xTask)
 	  else if (pxStateList == &xSuspendedTaskList)
 		{
 		  /* The task being queried is referenced from the suspended
-					list.  Is it genuinely suspended or is it block
+					list.  Is it genuinely suspended or is it blocked
 					indefinitely? */
 		  if (listLIST_ITEM_CONTAINER(&(pxTCB->xEventListItem)) == NULL)
 			{
-			  eReturn = eSuspended;
+			  #if(configUSE_TASK_NOTIFICATIONS == 1)
+			  {
+				/* The task does not appear on the event list item of
+							and of the RTOS objects, but could still be in the
+							blocked state if it is waiting on its notification
+							rather than waiting on an object. */
+				if (pxTCB->ucNotifyState == taskWAITING_NOTIFICATION)
+				  {
+					eReturn = eBlocked;
+				  }
+				else
+				  {
+					eReturn = eSuspended;
+				  }
+			  }
+			  #else
+																																	  {
+							eReturn = eSuspended;
+						}
+			  #endif
 			}
 		  else
 			{
@@ -1416,15 +1482,15 @@ eTaskState eTaskGetState (TaskHandle_t xTask)
 
 #if (INCLUDE_uxTaskPriorityGet == 1)
 
-UBaseType_t uxTaskPriorityGet (TaskHandle_t xTask)
+UBaseType_t uxTaskPriorityGet (const TaskHandle_t xTask)
 {
-  TCB_t *pxTCB;
+  TCB_t const *pxTCB;
   UBaseType_t uxReturn;
 
   taskENTER_CRITICAL();
   {
-	/* If null is passed in here then it is the priority of the that
-			called uxTaskPriorityGet() that is being queried. */
+	/* If null is passed in here then it is the priority of the task
+			that called uxTaskPriorityGet() that is being queried. */
 	pxTCB = prvGetTCBFromHandle(xTask);
 	uxReturn = pxTCB->uxPriority;
   }
@@ -1438,9 +1504,9 @@ UBaseType_t uxTaskPriorityGet (TaskHandle_t xTask)
 
 #if (INCLUDE_uxTaskPriorityGet == 1)
 
-UBaseType_t uxTaskPriorityGetFromISR (TaskHandle_t xTask)
+UBaseType_t uxTaskPriorityGetFromISR (const TaskHandle_t xTask)
 {
-  TCB_t *pxTCB;
+  TCB_t const *pxTCB;
   UBaseType_t uxReturn, uxSavedInterruptState;
 
   /* RTOS ports that support interrupt nesting have the concept of a
@@ -1458,7 +1524,7 @@ UBaseType_t uxTaskPriorityGetFromISR (TaskHandle_t xTask)
 		separate interrupt safe API to ensure interrupt entry is as fast and as
 		simple as possible.  More information (albeit Cortex-M specific) is
 		provided on the following link:
-		http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+		https://www.freertos.org/RTOS-Cortex-M3-M4.html */
   portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
   uxSavedInterruptState = portSET_INTERRUPT_MASK_FROM_ISR();
@@ -1722,7 +1788,7 @@ void vTaskSuspend (TaskHandle_t xTaskToSuspend)
 				to by pxCurrentTCB has just been suspended and pxCurrentTCB
 				must be adjusted to point to a different task. */
 		  if (listCURRENT_LIST_LENGTH(&xSuspendedTaskList)
-			  == uxCurrentNumberOfTasks)
+			  == uxCurrentNumberOfTasks) /*lint !e931 Right has no side effect, just volatile. */
 			{
 			  /* No other tasks are ready, so set pxCurrentTCB back to
 					NULL so when the next task is created pxCurrentTCB will
@@ -1750,7 +1816,7 @@ void vTaskSuspend (TaskHandle_t xTaskToSuspend)
 static BaseType_t prvTaskIsTaskSuspended (const TaskHandle_t xTask)
 {
   BaseType_t xReturn = pdFALSE;
-  const TCB_t *const pxTCB = (TCB_t *)xTask;
+  const TCB_t *const pxTCB = xTask;
 
   /* Accesses xPendingReadyList so must be called from a critical
 		section. */
@@ -1798,14 +1864,14 @@ static BaseType_t prvTaskIsTaskSuspended (const TaskHandle_t xTask)
 
 void vTaskResume (TaskHandle_t xTaskToResume)
 {
-  TCB_t *const pxTCB = (TCB_t *)xTaskToResume;
+  TCB_t *const pxTCB = xTaskToResume;
 
   /* It does not make sense to resume the calling task. */
   configASSERT(xTaskToResume);
 
   /* The parameter cannot be NULL as it is impossible to resume the
 		currently executing task. */
-  if ((pxTCB != NULL) && (pxTCB != pxCurrentTCB))
+  if ((pxTCB != pxCurrentTCB) && (pxTCB != NULL))
 	{
 	  taskENTER_CRITICAL();
 	  {
@@ -1849,15 +1915,15 @@ void vTaskResume (TaskHandle_t xTaskToResume)
 
 #if ((INCLUDE_xTaskResumeFromISR == 1) && (INCLUDE_vTaskSuspend == 1))
 
-BaseType_t xTaskResumeFromISR (TaskHandle_t xTaskToResume)
-{
-  BaseType_t xYieldRequired = pdFALSE;
-  TCB_t *const pxTCB = (TCB_t *)xTaskToResume;
-  UBaseType_t uxSavedInterruptStatus;
+																														BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume )
+	{
+	BaseType_t xYieldRequired = pdFALSE;
+	TCB_t * const pxTCB = xTaskToResume;
+	UBaseType_t uxSavedInterruptStatus;
 
-  configASSERT(xTaskToResume);
+		configASSERT( xTaskToResume );
 
-  /* RTOS ports that support interrupt nesting have the concept of a
+		/* RTOS ports that support interrupt nesting have the concept of a
 		maximum	system call (or maximum API call) interrupt priority.
 		Interrupts that are	above the maximum system call priority are keep
 		permanently enabled, even when the RTOS kernel is in a critical section,
@@ -1872,48 +1938,49 @@ BaseType_t xTaskResumeFromISR (TaskHandle_t xTaskToResume)
 		separate interrupt safe API to ensure interrupt entry is as fast and as
 		simple as possible.  More information (albeit Cortex-M specific) is
 		provided on the following link:
-		http://www.freertos.org/RTOS-Cortex-M3-M4.html */
-  portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
+		https://www.freertos.org/RTOS-Cortex-M3-M4.html */
+		portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-  uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
-  {
-	if (prvTaskIsTaskSuspended (pxTCB) != pdFALSE)
-	  {
-		traceTASK_RESUME_FROM_ISR(pxTCB);
+		uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+		{
+			if( prvTaskIsTaskSuspended( pxTCB ) != pdFALSE )
+			{
+				traceTASK_RESUME_FROM_ISR( pxTCB );
 
-		/* Check the ready lists can be accessed. */
-		if (uxSchedulerSuspended == (UBaseType_t)pdFALSE)
-		  {
-			/* Ready lists can be accessed so move the task from the
+				/* Check the ready lists can be accessed. */
+				if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+				{
+					/* Ready lists can be accessed so move the task from the
 					suspended list to the ready list directly. */
-			if (pxTCB->uxPriority >= pxCurrentTCB->uxPriority)
-			  {
-				xYieldRequired = pdTRUE;
-			  }
-			else
-			  {
-				mtCOVERAGE_TEST_MARKER();
-			  }
+					if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+					{
+						xYieldRequired = pdTRUE;
+					}
+					else
+					{
+						mtCOVERAGE_TEST_MARKER();
+					}
 
-			(void)uxListRemove (&(pxTCB->xStateListItem));prvAddTaskToReadyList(pxTCB);
-		  }
-		else
-		  {
-			/* The delayed or ready lists cannot be accessed so the task
+					( void ) uxListRemove( &( pxTCB->xStateListItem ) );
+					prvAddTaskToReadyList( pxTCB );
+				}
+				else
+				{
+					/* The delayed or ready lists cannot be accessed so the task
 					is held in the pending ready list until the scheduler is
 					unsuspended. */
-			vListInsertEnd (&(xPendingReadyList), &(pxTCB->xEventListItem));
-		  }
-	  }
-	else
-	  {
-		mtCOVERAGE_TEST_MARKER();
-	  }
-  }
-  portCLEAR_INTERRUPT_MASK_FROM_ISR(uxSavedInterruptStatus);
+					vListInsertEnd( &( xPendingReadyList ), &( pxTCB->xEventListItem ) );
+				}
+			}
+			else
+			{
+				mtCOVERAGE_TEST_MARKER();
+			}
+		}
+		portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
-  return xYieldRequired;
-}
+		return xYieldRequired;
+	}
 
 #endif /* ( ( INCLUDE_xTaskResumeFromISR == 1 ) && ( INCLUDE_vTaskSuspend == 1 ) ) */
 /*-----------------------------------------------------------*/
@@ -1936,7 +2003,7 @@ void vTaskStartScheduler (void)
 										 configIDLE_TASK_NAME,
 										 ulIdleTaskStackSize,
 										 (void *)NULL, /*lint !e961.  The cast is not redundant for all compilers. */
-										 (tskIDLE_PRIORITY | portPRIVILEGE_BIT),
+										 portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
 										 pxIdleTaskStackBuffer,
 										 pxIdleTaskTCBBuffer); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
 
@@ -1956,7 +2023,7 @@ void vTaskStartScheduler (void)
 								configIDLE_TASK_NAME,
 								configMINIMAL_STACK_SIZE,
 								( void * ) NULL,
-								( tskIDLE_PRIORITY | portPRIVILEGE_BIT ),
+								portPRIVILEGE_BIT, /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
 								&xIdleTaskHandle ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
 	}
   #endif /* configSUPPORT_STATIC_ALLOCATION */
@@ -2002,7 +2069,7 @@ void vTaskStartScheduler (void)
 
 	  xNextTaskUnblockTime = portMAX_DELAY;
 	  xSchedulerRunning = pdTRUE;
-	  xTickCount = (TickType_t)0U;
+	  xTickCount = (TickType_t)configINITIAL_TICK_COUNT;
 
 	  /* If configGENERATE_RUN_TIME_STATS is defined then the following
 		macro must be defined to configure the timer/counter used to generate
@@ -2011,6 +2078,8 @@ void vTaskStartScheduler (void)
 		have portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() defined in your
 		FreeRTOSConfig.h file. */
 	  portCONFIGURE_TIMER_FOR_RUN_TIME_STATS();
+
+	  traceTASK_SWITCHED_IN();
 
 	  /* Setting up the timer tick is hardware specific and thus in the
 		portable interface. */
@@ -2056,68 +2125,69 @@ void vTaskSuspendAll (void)
 	post in the FreeRTOS support forum before reporting this as a bug! -
 	http://goo.gl/wu4acr */
   ++uxSchedulerSuspended;
+  portMEMORY_BARRIER();
 }
 /*----------------------------------------------------------*/
 
 #if (configUSE_TICKLESS_IDLE != 0)
 
-																														static TickType_t prvGetExpectedIdleTime( void )
-	{
-	TickType_t xReturn;
-	UBaseType_t uxHigherPriorityReadyTasks = pdFALSE;
+static TickType_t prvGetExpectedIdleTime (void)
+{
+  TickType_t xReturn;
+  UBaseType_t uxHigherPriorityReadyTasks = pdFALSE;
 
-		/* uxHigherPriorityReadyTasks takes care of the case where
+  /* uxHigherPriorityReadyTasks takes care of the case where
 		configUSE_PREEMPTION is 0, so there may be tasks above the idle priority
 		task that are in the Ready state, even though the idle task is
 		running. */
-		#if( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
-		{
+  #if(configUSE_PORT_OPTIMISED_TASK_SELECTION == 0)
+																														  {
 			if( uxTopReadyPriority > tskIDLE_PRIORITY )
 			{
 				uxHigherPriorityReadyTasks = pdTRUE;
 			}
 		}
-		#else
-		{
-			const UBaseType_t uxLeastSignificantBit = ( UBaseType_t ) 0x01;
+  #else
+  {
+	const UBaseType_t uxLeastSignificantBit = (UBaseType_t)0x01;
 
-			/* When port optimised task selection is used the uxTopReadyPriority
-			variable is used as a bit map.  If bits other than the least
-			significant bit are set then there are tasks that have a priority
-			above the idle priority that are in the Ready state.  This takes
-			care of the case where the co-operative scheduler is in use. */
-			if( uxTopReadyPriority > uxLeastSignificantBit )
-			{
-				uxHigherPriorityReadyTasks = pdTRUE;
-			}
-		}
-		#endif
+	/* When port optimised task selection is used the uxTopReadyPriority
+	variable is used as a bit map.  If bits other than the least
+	significant bit are set then there are tasks that have a priority
+	above the idle priority that are in the Ready state.  This takes
+	care of the case where the co-operative scheduler is in use. */
+	if (uxTopReadyPriority > uxLeastSignificantBit)
+	  {
+		uxHigherPriorityReadyTasks = pdTRUE;
+	  }
+  }
+  #endif
 
-		if( pxCurrentTCB->uxPriority > tskIDLE_PRIORITY )
-		{
-			xReturn = 0;
-		}
-		else if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > 1 )
-		{
-			/* There are other idle priority tasks in the ready state.  If
-			time slicing is used then the very next tick interrupt must be
-			processed. */
-			xReturn = 0;
-		}
-		else if( uxHigherPriorityReadyTasks != pdFALSE )
-		{
-			/* There are tasks in the Ready state that have a priority above the
-			idle priority.  This path can only be reached if
-			configUSE_PREEMPTION is 0. */
-			xReturn = 0;
-		}
-		else
-		{
-			xReturn = xNextTaskUnblockTime - xTickCount;
-		}
-
-		return xReturn;
+  if (pxCurrentTCB->uxPriority > tskIDLE_PRIORITY)
+	{
+	  xReturn = 0;
 	}
+  else if (listCURRENT_LIST_LENGTH(&(pxReadyTasksLists[tskIDLE_PRIORITY])) > 1)
+	{
+	  /* There are other idle priority tasks in the ready state.  If
+	  time slicing is used then the very next tick interrupt must be
+	  processed. */
+	  xReturn = 0;
+	}
+  else if (uxHigherPriorityReadyTasks != pdFALSE)
+	{
+	  /* There are tasks in the Ready state that have a priority above the
+	  idle priority.  This path can only be reached if
+	  configUSE_PREEMPTION is 0. */
+	  xReturn = 0;
+	}
+  else
+	{
+	  xReturn = xNextTaskUnblockTime - xTickCount;
+	}
+
+  return xReturn;
+}
 
 #endif /* configUSE_TICKLESS_IDLE */
 /*----------------------------------------------------------*/
@@ -2148,7 +2218,7 @@ BaseType_t xTaskResumeAll (void)
 				appropriate ready list. */
 			while (listLIST_IS_EMPTY(&xPendingReadyList) == pdFALSE)
 			  {
-				pxTCB = (TCB_t *)listGET_OWNER_OF_HEAD_ENTRY((&xPendingReadyList));
+				pxTCB = listGET_OWNER_OF_HEAD_ENTRY((&xPendingReadyList)); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 				(void)uxListRemove (&(pxTCB->xEventListItem));
 				(void)uxListRemove (&(pxTCB->xStateListItem));prvAddTaskToReadyList(pxTCB);
 
@@ -2209,9 +2279,9 @@ BaseType_t xTaskResumeAll (void)
 			if (xYieldPending != pdFALSE)
 			  {
 				#if(configUSE_PREEMPTION != 0)
-																																		{
-						xAlreadyYielded = pdTRUE;
-					}
+				{
+				  xAlreadyYielded = pdTRUE;
+				}
 				#endif
 				taskYIELD_IF_USING_PREEMPTION();
 			  }
@@ -2265,7 +2335,7 @@ TickType_t xTaskGetTickCountFromISR (void)
 	system call	interrupt priority.  FreeRTOS maintains a separate interrupt
 	safe API to ensure interrupt entry is as fast and as simple as possible.
 	More information (albeit Cortex-M specific) is provided on the following
-	link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
+	link: https://www.freertos.org/RTOS-Cortex-M3-M4.html */
   portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
   uxSavedInterruptStatus = portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR();
@@ -2306,19 +2376,21 @@ pcTaskGetName (TaskHandle_t xTaskToQuery) /*lint !e971 Unqualified char types ar
 	TCB_t *pxNextTCB, *pxFirstTCB, *pxReturn = NULL;
 	UBaseType_t x;
 	char cNextChar;
+	BaseType_t xBreakLoop;
 
 		/* This function is called with the scheduler suspended. */
 
 		if( listCURRENT_LIST_LENGTH( pxList ) > ( UBaseType_t ) 0 )
 		{
-			listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList );
+			listGET_OWNER_OF_NEXT_ENTRY( pxFirstTCB, pxList );  /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 
 			do
 			{
-				listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList );
+				listGET_OWNER_OF_NEXT_ENTRY( pxNextTCB, pxList ); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 
 				/* Check each character in the name looking for a match or
 				mismatch. */
+				xBreakLoop = pdFALSE;
 				for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
 				{
 					cNextChar = pxNextTCB->pcTaskName[ x ];
@@ -2326,18 +2398,23 @@ pcTaskGetName (TaskHandle_t xTaskToQuery) /*lint !e971 Unqualified char types ar
 					if( cNextChar != pcNameToQuery[ x ] )
 					{
 						/* Characters didn't match. */
-						break;
+						xBreakLoop = pdTRUE;
 					}
-					else if( cNextChar == 0x00 )
+					else if( cNextChar == ( char ) 0x00 )
 					{
 						/* Both strings terminated, a match must have been
 						found. */
 						pxReturn = pxNextTCB;
-						break;
+						xBreakLoop = pdTRUE;
 					}
 					else
 					{
 						mtCOVERAGE_TEST_MARKER();
+					}
+
+					if( xBreakLoop != pdFALSE )
+					{
+						break;
 					}
 				}
 
@@ -2419,7 +2496,7 @@ pcTaskGetName (TaskHandle_t xTaskToQuery) /*lint !e971 Unqualified char types ar
 		}
 		( void ) xTaskResumeAll();
 
-		return ( TaskHandle_t ) pxTCB;
+		return pxTCB;
 	}
 
 #endif /* INCLUDE_xTaskGetHandle */
@@ -2521,15 +2598,15 @@ implementations require configUSE_TICKLESS_IDLE to be set to a value other than
 1. */
 #if (configUSE_TICKLESS_IDLE != 0)
 
-																														void vTaskStepTick( const TickType_t xTicksToJump )
-	{
-		/* Correct the tick count value after a period during which the tick
+void vTaskStepTick (const TickType_t xTicksToJump)
+{
+  /* Correct the tick count value after a period during which the tick
 		was suppressed.  Note this does *not* call the tick hook function for
 		each stepped tick. */
-		configASSERT( ( xTickCount + xTicksToJump ) <= xNextTaskUnblockTime );
-		xTickCount += xTicksToJump;
-		traceINCREASE_TICK_COUNT( xTicksToJump );
-	}
+  configASSERT((xTickCount + xTicksToJump) <= xNextTaskUnblockTime);
+  xTickCount += xTicksToJump;
+  traceINCREASE_TICK_COUNT(xTicksToJump);
+}
 
 #endif /* configUSE_TICKLESS_IDLE */
 /*----------------------------------------------------------*/
@@ -2538,7 +2615,7 @@ implementations require configUSE_TICKLESS_IDLE to be set to a value other than
 
 																														BaseType_t xTaskAbortDelay( TaskHandle_t xTask )
 	{
-	TCB_t *pxTCB = ( TCB_t * ) xTask;
+	TCB_t *pxTCB = xTask;
 	BaseType_t xReturn;
 
 		configASSERT( pxTCB );
@@ -2664,7 +2741,7 @@ BaseType_t xTaskIncrementTick (void)
 					item at the head of the delayed list.  This is the time
 					at which the task at the head of the delayed list must
 					be removed from the Blocked state. */
-				  pxTCB = (TCB_t *)listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList);
+				  pxTCB = listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 				  xItemValue = listGET_LIST_ITEM_VALUE(&(pxTCB->xStateListItem));
 
 				  if (xConstTickCount < xItemValue)
@@ -2675,7 +2752,7 @@ BaseType_t xTaskIncrementTick (void)
 						state -	so record the item value in
 						xNextTaskUnblockTime. */
 					  xNextTaskUnblockTime = xItemValue;
-					  break;
+					  break; /*lint !e9011 Code structure here is deedmed easier to understand with multiple breaks. */
 					}
 				  else
 					{
@@ -2703,20 +2780,20 @@ BaseType_t xTaskIncrementTick (void)
 				  /* A task being unblocked cannot cause an immediate
 					context switch if preemption is turned off. */
 				  #if (configUSE_PREEMPTION == 1)
-																																		  {
-						/* Preemption is on, but a context switch should
+				  {
+					/* Preemption is on, but a context switch should
 						only be performed if the unblocked task has a
 						priority that is equal to or higher than the
 						currently executing task. */
-						if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
-						{
-							xSwitchRequired = pdTRUE;
-						}
-						else
-						{
-							mtCOVERAGE_TEST_MARKER();
-						}
-					}
+					if (pxTCB->uxPriority >= pxCurrentTCB->uxPriority)
+					  {
+						xSwitchRequired = pdTRUE;
+					  }
+					else
+					  {
+						mtCOVERAGE_TEST_MARKER();
+					  }
+				  }
 				  #endif /* configUSE_PREEMPTION */
 				}
 			}
@@ -2726,16 +2803,17 @@ BaseType_t xTaskIncrementTick (void)
 		processing time (time slice) if preemption is on, and the application
 		writer has not explicitly turned time slicing off. */
 	  #if ((configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
-																															  {
-			if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
-			{
-				xSwitchRequired = pdTRUE;
-			}
-			else
-			{
-				mtCOVERAGE_TEST_MARKER();
-			}
-		}
+	  {
+		if (listCURRENT_LIST_LENGTH(&(pxReadyTasksLists[pxCurrentTCB->uxPriority]))
+			> (UBaseType_t)1)
+		  {
+			xSwitchRequired = pdTRUE;
+		  }
+		else
+		  {
+			mtCOVERAGE_TEST_MARKER();
+		  }
+	  }
 	  #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) ) */
 
 	  #if (configUSE_TICK_HOOK == 1)
@@ -2767,16 +2845,16 @@ BaseType_t xTaskIncrementTick (void)
 	}
 
   #if (configUSE_PREEMPTION == 1)
-																														  {
-		if( xYieldPending != pdFALSE )
-		{
-			xSwitchRequired = pdTRUE;
-		}
-		else
-		{
-			mtCOVERAGE_TEST_MARKER();
-		}
-	}
+  {
+	if (xYieldPending != pdFALSE)
+	  {
+		xSwitchRequired = pdTRUE;
+	  }
+	else
+	  {
+		mtCOVERAGE_TEST_MARKER();
+	  }
+  }
   #endif /* configUSE_PREEMPTION */
 
   return xSwitchRequired;
@@ -2797,13 +2875,15 @@ BaseType_t xTaskIncrementTick (void)
 		}
 		else
 		{
-			xTCB = ( TCB_t * ) xTask;
+			xTCB = xTask;
 		}
 
 		/* Save the hook function in the TCB.  A critical section is required as
 		the value can be accessed from an interrupt. */
 		taskENTER_CRITICAL();
+		{
 			xTCB->pxTaskTag = pxHookFunction;
+		}
 		taskEXIT_CRITICAL();
 	}
 
@@ -2814,26 +2894,44 @@ BaseType_t xTaskIncrementTick (void)
 
 																														TaskHookFunction_t xTaskGetApplicationTaskTag( TaskHandle_t xTask )
 	{
-	TCB_t *xTCB;
+	TCB_t *pxTCB;
 	TaskHookFunction_t xReturn;
 
-		/* If xTask is NULL then we are setting our own task hook. */
-		if( xTask == NULL )
-		{
-			xTCB = ( TCB_t * ) pxCurrentTCB;
-		}
-		else
-		{
-			xTCB = ( TCB_t * ) xTask;
-		}
+		/* If xTask is NULL then set the calling task's hook. */
+		pxTCB = prvGetTCBFromHandle( xTask );
 
 		/* Save the hook function in the TCB.  A critical section is required as
 		the value can be accessed from an interrupt. */
 		taskENTER_CRITICAL();
 		{
-			xReturn = xTCB->pxTaskTag;
+			xReturn = pxTCB->pxTaskTag;
 		}
 		taskEXIT_CRITICAL();
+
+		return xReturn;
+	}
+
+#endif /* configUSE_APPLICATION_TASK_TAG */
+/*-----------------------------------------------------------*/
+
+#if (configUSE_APPLICATION_TASK_TAG == 1)
+
+																														TaskHookFunction_t xTaskGetApplicationTaskTagFromISR( TaskHandle_t xTask )
+	{
+	TCB_t *pxTCB;
+	TaskHookFunction_t xReturn;
+	UBaseType_t uxSavedInterruptStatus;
+
+		/* If xTask is NULL then set the calling task's hook. */
+		pxTCB = prvGetTCBFromHandle( xTask );
+
+		/* Save the hook function in the TCB.  A critical section is required as
+		the value can be accessed from an interrupt. */
+		uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
+		{
+			xReturn = pxTCB->pxTaskTag;
+		}
+		portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
 
 		return xReturn;
 	}
@@ -2851,11 +2949,11 @@ BaseType_t xTaskIncrementTick (void)
 		/* If xTask is NULL then we are calling our own task hook. */
 		if( xTask == NULL )
 		{
-			xTCB = ( TCB_t * ) pxCurrentTCB;
+			xTCB = pxCurrentTCB;
 		}
 		else
 		{
-			xTCB = ( TCB_t * ) xTask;
+			xTCB = xTask;
 		}
 
 		if( xTCB->pxTaskTag != NULL )
@@ -2888,38 +2986,52 @@ void vTaskSwitchContext (void)
 
 	  #if (configGENERATE_RUN_TIME_STATS == 1)
 																															  {
-				#ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
-					portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
-				#else
-					ulTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
-				#endif
+			#ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
+				portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
+			#else
+				ulTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
+			#endif
 
-				/* Add the amount of time the task has been running to the
-				accumulated time so far.  The time the task started running was
-				stored in ulTaskSwitchedInTime.  Note that there is no overflow
-				protection here so count values are only valid until the timer
-				overflows.  The guard against negative values is to protect
-				against suspect run time stat counter implementations - which
-				are provided by the application, not the kernel. */
-				if( ulTotalRunTime > ulTaskSwitchedInTime )
-				{
-					pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime - ulTaskSwitchedInTime );
-				}
-				else
-				{
-					mtCOVERAGE_TEST_MARKER();
-				}
-				ulTaskSwitchedInTime = ulTotalRunTime;
+			/* Add the amount of time the task has been running to the
+			accumulated time so far.  The time the task started running was
+			stored in ulTaskSwitchedInTime.  Note that there is no overflow
+			protection here so count values are only valid until the timer
+			overflows.  The guard against negative values is to protect
+			against suspect run time stat counter implementations - which
+			are provided by the application, not the kernel. */
+			if( ulTotalRunTime > ulTaskSwitchedInTime )
+			{
+				pxCurrentTCB->ulRunTimeCounter += ( ulTotalRunTime - ulTaskSwitchedInTime );
+			}
+			else
+			{
+				mtCOVERAGE_TEST_MARKER();
+			}
+			ulTaskSwitchedInTime = ulTotalRunTime;
 		}
 	  #endif /* configGENERATE_RUN_TIME_STATS */
 
 	  /* Check for stack overflow, if configured. */
 	  taskCHECK_FOR_STACK_OVERFLOW();
 
+	  /* Before the currently running task is switched out, save its errno. */
+	  #if(configUSE_POSIX_ERRNO == 1)
+																															  {
+			pxCurrentTCB->iTaskErrno = FreeRTOS_errno;
+		}
+	  #endif
+
 	  /* Select a new task to run using either the generic C or port
 		optimised asm code. */
-	  taskSELECT_HIGHEST_PRIORITY_TASK();
+	  taskSELECT_HIGHEST_PRIORITY_TASK(); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 	  traceTASK_SWITCHED_IN();
+
+	  /* After the new task is switched in, update the global errno. */
+	  #if(configUSE_POSIX_ERRNO == 1)
+																															  {
+			FreeRTOS_errno = pxCurrentTCB->iTaskErrno;
+		}
+	  #endif
 
 	  #if (configUSE_NEWLIB_REENTRANT == 1)
 																															  {
@@ -3028,13 +3140,27 @@ BaseType_t xTaskRemoveFromEventList (const List_t *const pxEventList)
 
 	This function assumes that a check has already been made to ensure that
 	pxEventList is not empty. */
-  pxUnblockedTCB = (TCB_t *)listGET_OWNER_OF_HEAD_ENTRY(pxEventList);
+  pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
   configASSERT(pxUnblockedTCB);
   (void)uxListRemove (&(pxUnblockedTCB->xEventListItem));
 
   if (uxSchedulerSuspended == (UBaseType_t)pdFALSE)
 	{
 	  (void)uxListRemove (&(pxUnblockedTCB->xStateListItem));prvAddTaskToReadyList(pxUnblockedTCB);
+
+	  #if(configUSE_TICKLESS_IDLE != 0)
+	  {
+		/* If a task is blocked on a kernel object then xNextTaskUnblockTime
+			might be set to the blocked task's time out time.  If the task is
+			unblocked for a reason other than a timeout xNextTaskUnblockTime is
+			normally left unchanged, because it is automatically reset to a new
+			value when the tick count equals xNextTaskUnblockTime.  However if
+			tickless idling is used it might be more important to enter sleep mode
+			at the earliest possible time - so reset xNextTaskUnblockTime here to
+			ensure it is updated at the earliest possible time. */
+		prvResetNextTaskUnblockTime ();
+	  }
+	  #endif
 	}
   else
 	{
@@ -3059,20 +3185,6 @@ BaseType_t xTaskRemoveFromEventList (const List_t *const pxEventList)
 	  xReturn = pdFALSE;
 	}
 
-  #if(configUSE_TICKLESS_IDLE != 0)
-																														  {
-		/* If a task is blocked on a kernel object then xNextTaskUnblockTime
-		might be set to the blocked task's time out time.  If the task is
-		unblocked for a reason other than a timeout xNextTaskUnblockTime is
-		normally left unchanged, because it is automatically reset to a new
-		value when the tick count equals xNextTaskUnblockTime.  However if
-		tickless idling is used it might be more important to enter sleep mode
-		at the earliest possible time - so reset xNextTaskUnblockTime here to
-		ensure it is updated at the earliest possible time. */
-		prvResetNextTaskUnblockTime();
-	}
-  #endif
-
   return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -3092,7 +3204,7 @@ vTaskRemoveFromUnorderedEventList (ListItem_t *pxEventListItem, const TickType_t
 
   /* Remove the event list form the event flag.  Interrupts do not access
 	event flags. */
-  pxUnblockedTCB = (TCB_t *)listGET_LIST_ITEM_OWNER(pxEventListItem);
+  pxUnblockedTCB = listGET_LIST_ITEM_OWNER(pxEventListItem); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
   configASSERT(pxUnblockedTCB);
   (void)uxListRemove (pxEventListItem);
 
@@ -3148,7 +3260,7 @@ xTaskCheckForTimeOut (TimeOut_t *const pxTimeOut, TickType_t *const pxTicksToWai
 		xConstTickCount - pxTimeOut->xTimeOnEntering;
 
 	#if(INCLUDE_xTaskAbortDelay == 1)
-																															if( pxCurrentTCB->ucDelayAborted != pdFALSE )
+																															if( pxCurrentTCB->ucDelayAborted != ( uint8_t ) pdFALSE )
 			{
 				/* The delay was aborted, which is not the same as a time out,
 				but has the same result. */
@@ -3210,11 +3322,11 @@ void vTaskMissedYield (void)
 UBaseType_t uxTaskGetTaskNumber (TaskHandle_t xTask)
 {
   UBaseType_t uxReturn;
-  TCB_t *pxTCB;
+  TCB_t const *pxTCB;
 
   if (xTask != NULL)
 	{
-	  pxTCB = (TCB_t *)xTask;
+	  pxTCB = xTask;
 	  uxReturn = pxTCB->uxTaskNumber;
 	}
   else
@@ -3236,7 +3348,7 @@ void vTaskSetTaskNumber (TaskHandle_t xTask, const UBaseType_t uxHandle)
 
   if (xTask != NULL)
 	{
-	  pxTCB = (TCB_t *)xTask;
+	  pxTCB = xTask;
 	  pxTCB->uxTaskNumber = uxHandle;
 	}
 }
@@ -3265,7 +3377,7 @@ static portTASK_FUNCTION(prvIdleTask, pvParameters)
   /* In case a task that has a secure context deletes itself, in which case
 	the idle task is responsible for deleting the task's secure context, if
 	any. */
-  portTASK_CALLS_SECURE_FUNCTIONS();
+  portALLOCATE_SECURE_CONTEXT(configMINIMAL_SECURE_STACK_SIZE);
 
   for (;;)
 	{
@@ -3274,18 +3386,18 @@ static portTASK_FUNCTION(prvIdleTask, pvParameters)
 	  prvCheckTasksWaitingTermination ();
 
 	  #if (configUSE_PREEMPTION == 0)
-	  {
-		/* If we are not using preemption we keep forcing a task switch to
+																															  {
+			/* If we are not using preemption we keep forcing a task switch to
 			see if any other task has become available.  If we are using
 			preemption we don't need to do this as any task becoming available
 			will automatically get the processor anyway. */
-		taskYIELD();
-	  }
+			taskYIELD();
+		}
 	  #endif /* configUSE_PREEMPTION */
 
 	  #if ((configUSE_PREEMPTION == 1) && (configIDLE_SHOULD_YIELD == 1))
-																															  {
-			/* When using preemption tasks of equal priority will be
+	  {
+		/* When using preemption tasks of equal priority will be
 			timesliced.  If a task that is sharing the idle priority is ready
 			to run then the idle task should yield before the end of the
 			timeslice.
@@ -3294,15 +3406,16 @@ static portTASK_FUNCTION(prvIdleTask, pvParameters)
 			the list, and an occasional incorrect value will not matter.  If
 			the ready list at the idle priority contains more than one task
 			then a task other than the idle task is ready to execute. */
-			if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > ( UBaseType_t ) 1 )
-			{
-				taskYIELD();
-			}
-			else
-			{
-				mtCOVERAGE_TEST_MARKER();
-			}
-		}
+		if (listCURRENT_LIST_LENGTH(&(pxReadyTasksLists[tskIDLE_PRIORITY]))
+			> (UBaseType_t)1)
+		  {
+			taskYIELD();
+		  }
+		else
+		  {
+			mtCOVERAGE_TEST_MARKER();
+		  }
+	  }
 	  #endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configIDLE_SHOULD_YIELD == 1 ) ) */
 
 	  #if (configUSE_IDLE_HOOK == 1)
@@ -3323,49 +3436,49 @@ static portTASK_FUNCTION(prvIdleTask, pvParameters)
 		user defined low power mode	implementations require
 		configUSE_TICKLESS_IDLE to be set to a value other than 1. */
 	  #if (configUSE_TICKLESS_IDLE != 0)
-																															  {
+	  {
 		TickType_t xExpectedIdleTime;
 
-			/* It is not desirable to suspend then resume the scheduler on
+		/* It is not desirable to suspend then resume the scheduler on
 			each iteration of the idle task.  Therefore, a preliminary
 			test of the expected idle time is performed without the
 			scheduler suspended.  The result here is not necessarily
 			valid. */
-			xExpectedIdleTime = prvGetExpectedIdleTime();
+		xExpectedIdleTime = prvGetExpectedIdleTime ();
 
-			if( xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
+		if (xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP)
+		  {
+			vTaskSuspendAll ();
 			{
-				vTaskSuspendAll();
+			  /* Now the scheduler is suspended, the expected idle
+			  time can be sampled again, and this time its value can
+			  be used. */
+			  configASSERT(xNextTaskUnblockTime >= xTickCount);
+			  xExpectedIdleTime = prvGetExpectedIdleTime ();
+
+			  /* Define the following macro to set xExpectedIdleTime to 0
+			  if the application does not want
+			  portSUPPRESS_TICKS_AND_SLEEP() to be called. */
+			  configPRE_SUPPRESS_TICKS_AND_SLEEP_PROCESSING(xExpectedIdleTime);
+
+			  if (xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP)
 				{
-					/* Now the scheduler is suspended, the expected idle
-					time can be sampled again, and this time its value can
-					be used. */
-					configASSERT( xNextTaskUnblockTime >= xTickCount );
-					xExpectedIdleTime = prvGetExpectedIdleTime();
-
-					/* Define the following macro to set xExpectedIdleTime to 0
-					if the application does not want
-					portSUPPRESS_TICKS_AND_SLEEP() to be called. */
-					configPRE_SUPPRESS_TICKS_AND_SLEEP_PROCESSING( xExpectedIdleTime );
-
-					if( xExpectedIdleTime >= configEXPECTED_IDLE_TIME_BEFORE_SLEEP )
-					{
-						traceLOW_POWER_IDLE_BEGIN();
-						portSUPPRESS_TICKS_AND_SLEEP( xExpectedIdleTime );
-						traceLOW_POWER_IDLE_END();
-					}
-					else
-					{
-						mtCOVERAGE_TEST_MARKER();
-					}
+				  traceLOW_POWER_IDLE_BEGIN();
+				  portSUPPRESS_TICKS_AND_SLEEP(xExpectedIdleTime);
+				  traceLOW_POWER_IDLE_END();
 				}
-				( void ) xTaskResumeAll();
+			  else
+				{
+				  mtCOVERAGE_TEST_MARKER();
+				}
 			}
-			else
-			{
-				mtCOVERAGE_TEST_MARKER();
-			}
-		}
+			(void)xTaskResumeAll ();
+		  }
+		else
+		  {
+			mtCOVERAGE_TEST_MARKER();
+		  }
+	  }
 	  #endif /* configUSE_TICKLESS_IDLE */
 	}
 }
@@ -3373,40 +3486,41 @@ static portTASK_FUNCTION(prvIdleTask, pvParameters)
 
 #if(configUSE_TICKLESS_IDLE != 0)
 
-																														eSleepModeStatus eTaskConfirmSleepModeStatus( void )
+eSleepModeStatus eTaskConfirmSleepModeStatus (void)
+{
+  /* The idle task exists in addition to the application tasks. */
+  const UBaseType_t uxNonApplicationTasks = 1;
+  eSleepModeStatus eReturn = eStandardSleep;
+
+  if (listCURRENT_LIST_LENGTH(&xPendingReadyList) != 0)
 	{
-	/* The idle task exists in addition to the application tasks. */
-	const UBaseType_t uxNonApplicationTasks = 1;
-	eSleepModeStatus eReturn = eStandardSleep;
-
-		if( listCURRENT_LIST_LENGTH( &xPendingReadyList ) != 0 )
-		{
-			/* A task was made ready while the scheduler was suspended. */
-			eReturn = eAbortSleep;
-		}
-		else if( xYieldPending != pdFALSE )
-		{
-			/* A yield was pended while the scheduler was suspended. */
-			eReturn = eAbortSleep;
-		}
-		else
-		{
-			/* If all the tasks are in the suspended list (which might mean they
-			have an infinite block time rather than actually being suspended)
-			then it is safe to turn all clocks off and just wait for external
-			interrupts. */
-			if( listCURRENT_LIST_LENGTH( &xSuspendedTaskList ) == ( uxCurrentNumberOfTasks - uxNonApplicationTasks ) )
-			{
-				eReturn = eNoTasksWaitingTimeout;
-			}
-			else
-			{
-				mtCOVERAGE_TEST_MARKER();
-			}
-		}
-
-		return eReturn;
+	  /* A task was made ready while the scheduler was suspended. */
+	  eReturn = eAbortSleep;
 	}
+  else if (xYieldPending != pdFALSE)
+	{
+	  /* A yield was pended while the scheduler was suspended. */
+	  eReturn = eAbortSleep;
+	}
+  else
+	{
+	  /* If all the tasks are in the suspended list (which might mean they
+	  have an infinite block time rather than actually being suspended)
+	  then it is safe to turn all clocks off and just wait for external
+	  interrupts. */
+	  if (listCURRENT_LIST_LENGTH(&xSuspendedTaskList)
+		  == (uxCurrentNumberOfTasks - uxNonApplicationTasks))
+		{
+		  eReturn = eNoTasksWaitingTimeout;
+		}
+	  else
+		{
+		  mtCOVERAGE_TEST_MARKER();
+		}
+	}
+
+  return eReturn;
+}
 
 #endif /* configUSE_TICKLESS_IDLE */
 /*-----------------------------------------------------------*/
@@ -3508,13 +3622,13 @@ static void prvCheckTasksWaitingTermination (void)
   {
 	TCB_t *pxTCB;
 
-	/* uxDeletedTasksWaitingCleanUp is used to prevent vTaskSuspendAll()
+	/* uxDeletedTasksWaitingCleanUp is used to prevent taskENTER_CRITICAL()
 		being called too often in the idle task. */
 	while (uxDeletedTasksWaitingCleanUp > (UBaseType_t)0U)
 	  {
 		taskENTER_CRITICAL();
 		{
-		  pxTCB = (TCB_t *)listGET_OWNER_OF_HEAD_ENTRY((&xTasksWaitingTermination));
+		  pxTCB = listGET_OWNER_OF_HEAD_ENTRY((&xTasksWaitingTermination)); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 		  (void)uxListRemove (&(pxTCB->xStateListItem));
 		  --uxCurrentNumberOfTasks;
 		  --uxDeletedTasksWaitingCleanUp;
@@ -3635,7 +3749,7 @@ prvListTasksWithinSingleList (TaskStatus_t *pxTaskStatusArray, List_t *pxList, e
 
   if (listCURRENT_LIST_LENGTH(pxList) > (UBaseType_t)0)
 	{
-	  listGET_OWNER_OF_NEXT_ENTRY(pxFirstTCB, pxList);
+	  listGET_OWNER_OF_NEXT_ENTRY(pxFirstTCB, pxList); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 
 	  /* Populate an TaskStatus_t structure within the
 			pxTaskStatusArray array for each task that is referenced from
@@ -3643,7 +3757,7 @@ prvListTasksWithinSingleList (TaskStatus_t *pxTaskStatusArray, List_t *pxList, e
 			meaning of each TaskStatus_t structure member. */
 	  do
 		{
-		  listGET_OWNER_OF_NEXT_ENTRY(pxNextTCB, pxList);
+		  listGET_OWNER_OF_NEXT_ENTRY(pxNextTCB, pxList); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 		  vTaskGetInfo ((TaskHandle_t)pxNextTCB, &(pxTaskStatusArray[uxTask]), pdTRUE, eState);
 		  uxTask++;
 		}
@@ -3660,9 +3774,10 @@ prvListTasksWithinSingleList (TaskStatus_t *pxTaskStatusArray, List_t *pxList, e
 #endif /* configUSE_TRACE_FACILITY */
 /*-----------------------------------------------------------*/
 
-#if ((configUSE_TRACE_FACILITY == 1) || (INCLUDE_uxTaskGetStackHighWaterMark == 1))
+#if ((configUSE_TRACE_FACILITY == 1) || (INCLUDE_uxTaskGetStackHighWaterMark == 1) || (INCLUDE_uxTaskGetStackHighWaterMark2 == 1))
 
-static uint16_t prvTaskCheckFreeStackSpace (const uint8_t *pucStackByte)
+static configSTACK_DEPTH_TYPE
+prvTaskCheckFreeStackSpace (const uint8_t *pucStackByte)
 {
   uint32_t ulCount = 0U;
 
@@ -3674,10 +3789,50 @@ static uint16_t prvTaskCheckFreeStackSpace (const uint8_t *pucStackByte)
 
   ulCount /= (uint32_t)sizeof (StackType_t); /*lint !e961 Casting is not redundant on smaller architectures. */
 
-  return (uint16_t)ulCount;
+  return (configSTACK_DEPTH_TYPE)ulCount;
 }
 
-#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) ) */
+#endif /* ( ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark2 == 1 ) ) */
+/*-----------------------------------------------------------*/
+
+#if (INCLUDE_uxTaskGetStackHighWaterMark2 == 1)
+
+																														/* uxTaskGetStackHighWaterMark() and uxTaskGetStackHighWaterMark2() are the
+	same except for their return type.  Using configSTACK_DEPTH_TYPE allows the
+	user to determine the return type.  It gets around the problem of the value
+	overflowing on 8-bit types without breaking backward compatibility for
+	applications that expect an 8-bit return type. */
+	configSTACK_DEPTH_TYPE uxTaskGetStackHighWaterMark2( TaskHandle_t xTask )
+	{
+	TCB_t *pxTCB;
+	uint8_t *pucEndOfStack;
+	configSTACK_DEPTH_TYPE uxReturn;
+
+		/* uxTaskGetStackHighWaterMark() and uxTaskGetStackHighWaterMark2() are
+		the same except for their return type.  Using configSTACK_DEPTH_TYPE
+		allows the user to determine the return type.  It gets around the
+		problem of the value overflowing on 8-bit types without breaking
+		backward compatibility for applications that expect an 8-bit return
+		type. */
+
+		pxTCB = prvGetTCBFromHandle( xTask );
+
+		#if portSTACK_GROWTH < 0
+		{
+			pucEndOfStack = ( uint8_t * ) pxTCB->pxStack;
+		}
+		#else
+		{
+			pucEndOfStack = ( uint8_t * ) pxTCB->pxEndOfStack;
+		}
+		#endif
+
+		uxReturn = prvTaskCheckFreeStackSpace( pucEndOfStack );
+
+		return uxReturn;
+	}
+
+#endif /* INCLUDE_uxTaskGetStackHighWaterMark2 */
 /*-----------------------------------------------------------*/
 
 #if (INCLUDE_uxTaskGetStackHighWaterMark == 1)
@@ -3732,7 +3887,7 @@ static void prvDeleteTCB (TCB_t *pxTCB)
 			vPortFree( pxTCB->pxStack );
 			vPortFree( pxTCB );
 		}
-  #elif(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e731 Macro has been consolidated for readability reasons. */
+  #elif(tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0) /*lint !e731 !e9029 Macro has been consolidated for readability reasons. */
   {
 	/* The task could have been allocated statically or dynamically, so
 			check what was statically allocated before trying to free the
@@ -3783,7 +3938,7 @@ static void prvResetNextTaskUnblockTime (void)
 		the item at the head of the delayed list.  This is the time at
 		which the task at the head of the delayed list should be removed
 		from the Blocked state. */
-	  (pxTCB) = (TCB_t *)listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList);
+	  (pxTCB) = listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList); /*lint !e9079 void * is used as this macro is used with timers and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
 	  xNextTaskUnblockTime = listGET_LIST_ITEM_VALUE(&((pxTCB)->xStateListItem));
 	}
 }
@@ -3838,7 +3993,7 @@ BaseType_t xTaskGetSchedulerState (void)
 
 BaseType_t xTaskPriorityInherit (TaskHandle_t const pxMutexHolder)
 {
-  TCB_t *const pxMutexHolderTCB = (TCB_t *)pxMutexHolder;
+  TCB_t *const pxMutexHolderTCB = pxMutexHolder;
   BaseType_t xReturn = pdFALSE;
 
   /* If the mutex was given back by an interrupt while the queue was
@@ -3929,7 +4084,7 @@ BaseType_t xTaskPriorityInherit (TaskHandle_t const pxMutexHolder)
 
 BaseType_t xTaskPriorityDisinherit (TaskHandle_t const pxMutexHolder)
 {
-  TCB_t *const pxTCB = (TCB_t *)pxMutexHolder;
+  TCB_t *const pxTCB = pxMutexHolder;
   BaseType_t xReturn = pdFALSE;
 
   if (pxMutexHolder != NULL)
@@ -4012,7 +4167,7 @@ BaseType_t xTaskPriorityDisinherit (TaskHandle_t const pxMutexHolder)
 void
 vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType_t uxHighestPriorityWaitingTask)
 {
-  TCB_t *const pxTCB = (TCB_t *)pxMutexHolder;
+  TCB_t *const pxTCB = pxMutexHolder;
   UBaseType_t uxPriorityUsedOnEntry, uxPriorityToUse;
   const UBaseType_t uxOnlyOneMutexHeld = (UBaseType_t)1;
 
@@ -4194,7 +4349,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 		}
 
 		/* Terminate. */
-		pcBuffer[ x ] = 0x00;
+		pcBuffer[ x ] = ( char ) 0x00;
 
 		/* Return the new end of string. */
 		return &( pcBuffer[ x ] );
@@ -4208,7 +4363,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 																														void vTaskList( char * pcWriteBuffer )
 	{
 	TaskStatus_t *pxTaskStatusArray;
-	volatile UBaseType_t uxArraySize, x;
+	UBaseType_t uxArraySize, x;
 	char cStatus;
 
 		/*
@@ -4237,7 +4392,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 
 
 		/* Make sure the write buffer does not contain a string. */
-		*pcWriteBuffer = 0x00;
+		*pcWriteBuffer = ( char ) 0x00;
 
 		/* Take a snapshot of the number of tasks in case it changes while this
 		function is executing. */
@@ -4246,7 +4401,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 		/* Allocate an array index for each task.  NOTE!  if
 		configSUPPORT_DYNAMIC_ALLOCATION is set to 0 then pvPortMalloc() will
 		equate to NULL. */
-		pxTaskStatusArray = pvPortMalloc( uxCurrentNumberOfTasks * sizeof( TaskStatus_t ) );
+		pxTaskStatusArray = pvPortMalloc( uxCurrentNumberOfTasks * sizeof( TaskStatus_t ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation allocates a struct that has the alignment requirements of a pointer. */
 
 		if( pxTaskStatusArray != NULL )
 		{
@@ -4273,9 +4428,10 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 					case eDeleted:		cStatus = tskDELETED_CHAR;
 										break;
 
+					case eInvalid:		/* Fall through. */
 					default:			/* Should not get here, but it is included
 										to prevent static checking errors. */
-										cStatus = 0x00;
+										cStatus = ( char ) 0x00;
 										break;
 				}
 
@@ -4284,8 +4440,8 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 				pcWriteBuffer = prvWriteNameToBuffer( pcWriteBuffer, pxTaskStatusArray[ x ].pcTaskName );
 
 				/* Write the rest of the string. */
-				sprintf( pcWriteBuffer, "\t%c\t%u\t%u\t%u\r\n", cStatus, ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority, ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark, ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber );
-				pcWriteBuffer += strlen( pcWriteBuffer );
+				sprintf( pcWriteBuffer, "\t%c\t%u\t%u\t%u\r\n", cStatus, ( unsigned int ) pxTaskStatusArray[ x ].uxCurrentPriority, ( unsigned int ) pxTaskStatusArray[ x ].usStackHighWaterMark, ( unsigned int ) pxTaskStatusArray[ x ].xTaskNumber ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
+				pcWriteBuffer += strlen( pcWriteBuffer ); /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
 			}
 
 			/* Free the array again.  NOTE!  If configSUPPORT_DYNAMIC_ALLOCATION
@@ -4306,7 +4462,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 																														void vTaskGetRunTimeStats( char *pcWriteBuffer )
 	{
 	TaskStatus_t *pxTaskStatusArray;
-	volatile UBaseType_t uxArraySize, x;
+	UBaseType_t uxArraySize, x;
 	uint32_t ulTotalTime, ulStatsAsPercentage;
 
 		#if( configUSE_TRACE_FACILITY != 1 )
@@ -4341,7 +4497,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 		 */
 
 		/* Make sure the write buffer does not contain a string. */
-		*pcWriteBuffer = 0x00;
+		*pcWriteBuffer = ( char ) 0x00;
 
 		/* Take a snapshot of the number of tasks in case it changes while this
 		function is executing. */
@@ -4350,7 +4506,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 		/* Allocate an array index for each task.  NOTE!  If
 		configSUPPORT_DYNAMIC_ALLOCATION is set to 0 then pvPortMalloc() will
 		equate to NULL. */
-		pxTaskStatusArray = pvPortMalloc( uxCurrentNumberOfTasks * sizeof( TaskStatus_t ) );
+		pxTaskStatusArray = pvPortMalloc( uxCurrentNumberOfTasks * sizeof( TaskStatus_t ) ); /*lint !e9079 All values returned by pvPortMalloc() have at least the alignment required by the MCU's stack and this allocation allocates a struct that has the alignment requirements of a pointer. */
 
 		if( pxTaskStatusArray != NULL )
 		{
@@ -4361,7 +4517,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 			ulTotalTime /= 100UL;
 
 			/* Avoid divide by zero errors. */
-			if( ulTotalTime > 0 )
+			if( ulTotalTime > 0UL )
 			{
 				/* Create a human readable table from the binary data. */
 				for( x = 0; x < uxArraySize; x++ )
@@ -4386,7 +4542,7 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 						{
 							/* sizeof( int ) == sizeof( long ) so a smaller
 							printf() library can be used. */
-							sprintf( pcWriteBuffer, "\t%u\t\t%u%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter, ( unsigned int ) ulStatsAsPercentage );
+							sprintf( pcWriteBuffer, "\t%u\t\t%u%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter, ( unsigned int ) ulStatsAsPercentage ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
 						}
 						#endif
 					}
@@ -4402,12 +4558,12 @@ vTaskPriorityDisinheritAfterTimeout (TaskHandle_t const pxMutexHolder, UBaseType
 						{
 							/* sizeof( int ) == sizeof( long ) so a smaller
 							printf() library can be used. */
-							sprintf( pcWriteBuffer, "\t%u\t\t<1%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter );
+							sprintf( pcWriteBuffer, "\t%u\t\t<1%%\r\n", ( unsigned int ) pxTaskStatusArray[ x ].ulRunTimeCounter ); /*lint !e586 sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation. */
 						}
 						#endif
 					}
 
-					pcWriteBuffer += strlen( pcWriteBuffer );
+					pcWriteBuffer += strlen( pcWriteBuffer ); /*lint !e9016 Pointer arithmetic ok on char pointers especially as in this case where it best denotes the intent of the code. */
 				}
 			}
 			else
@@ -4446,7 +4602,7 @@ TickType_t uxTaskResetEventItemValue (void)
 
 #if (configUSE_MUTEXES == 1)
 
-void *pvTaskIncrementMutexHeldCount (void)
+TaskHandle_t pvTaskIncrementMutexHeldCount (void)
 {
   /* If xSemaphoreCreateMutex() is called before any tasks have been created
 		then pxCurrentTCB will be NULL. */
@@ -4621,7 +4777,7 @@ xTaskGenericNotify (TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction 
   uint8_t ucOriginalNotifyState;
 
   configASSERT(xTaskToNotify);
-  pxTCB = (TCB_t *)xTaskToNotify;
+  pxTCB = xTaskToNotify;
 
   taskENTER_CRITICAL();
   {
@@ -4661,6 +4817,14 @@ xTaskGenericNotify (TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction 
 		  /* The task is being notified without its notify value being
 					updated. */
 		  break;
+
+		default:
+		  /* Should not get here if all enums are handled.
+					Artificially force an assert by testing a value the
+					compiler can't assume is const. */
+		  configASSERT(pxTCB->ulNotifiedValue == ~0UL);
+
+		break;
 	  }
 
 	traceTASK_NOTIFY();
@@ -4676,8 +4840,8 @@ xTaskGenericNotify (TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction 
 			listLIST_ITEM_CONTAINER (&(pxTCB->xEventListItem)) == NULL);
 
 		#if(configUSE_TICKLESS_IDLE != 0)
-																																{
-					/* If a task is blocked waiting for a notification then
+		{
+		  /* If a task is blocked waiting for a notification then
 					xNextTaskUnblockTime might be set to the blocked task's time
 					out time.  If the task is unblocked for a reason other than
 					a timeout xNextTaskUnblockTime is normally left unchanged,
@@ -4687,8 +4851,8 @@ xTaskGenericNotify (TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotifyAction 
 					sleep mode at the earliest possible time - so reset
 					xNextTaskUnblockTime here to ensure it is updated at the
 					earliest possible time. */
-					prvResetNextTaskUnblockTime();
-				}
+		  prvResetNextTaskUnblockTime ();
+		}
 		#endif
 
 		if (pxTCB->uxPriority > pxCurrentTCB->uxPriority)
@@ -4745,7 +4909,7 @@ xTaskGenericNotifyFromISR (TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotify
 		http://www.freertos.org/RTOS-Cortex-M3-M4.html */
   portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-  pxTCB = (TCB_t *)xTaskToNotify;
+  pxTCB = xTaskToNotify;
 
   uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
   {
@@ -4784,6 +4948,13 @@ xTaskGenericNotifyFromISR (TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotify
 		  /* The task is being notified without its notify value being
 					updated. */
 		  break;
+
+		default:
+		  /* Should not get here if all enums are handled.
+					Artificially force an assert by testing a value the
+					compiler can't assume is const. */
+		  configASSERT(pxTCB->ulNotifiedValue == ~0UL);
+		break;
 	  }
 
 	traceTASK_NOTIFY_FROM_ISR();
@@ -4815,13 +4986,11 @@ xTaskGenericNotifyFromISR (TaskHandle_t xTaskToNotify, uint32_t ulValue, eNotify
 			  {
 				*pxHigherPriorityTaskWoken = pdTRUE;
 			  }
-			else
-			  {
-				/* Mark that a yield is pending in case the user is not
-						using the "xHigherPriorityTaskWoken" parameter to an ISR
-						safe FreeRTOS function. */
-				xYieldPending = pdTRUE;
-			  }
+
+			/* Mark that a yield is pending in case the user is not
+					using the "xHigherPriorityTaskWoken" parameter to an ISR
+					safe FreeRTOS function. */
+			xYieldPending = pdTRUE;
 		  }
 		else
 		  {
@@ -4866,7 +5035,7 @@ vTaskNotifyGiveFromISR (TaskHandle_t xTaskToNotify, BaseType_t *pxHigherPriority
 		http://www.freertos.org/RTOS-Cortex-M3-M4.html */
   portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
 
-  pxTCB = (TCB_t *)xTaskToNotify;
+  pxTCB = xTaskToNotify;
 
   uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
   {
@@ -4906,13 +5075,11 @@ vTaskNotifyGiveFromISR (TaskHandle_t xTaskToNotify, BaseType_t *pxHigherPriority
 			  {
 				*pxHigherPriorityTaskWoken = pdTRUE;
 			  }
-			else
-			  {
-				/* Mark that a yield is pending in case the user is not
-						using the "xHigherPriorityTaskWoken" parameter in an ISR
-						safe FreeRTOS function. */
-				xYieldPending = pdTRUE;
-			  }
+
+			/* Mark that a yield is pending in case the user is not
+					using the "xHigherPriorityTaskWoken" parameter in an ISR
+					safe FreeRTOS function. */
+			xYieldPending = pdTRUE;
 		  }
 		else
 		  {
@@ -4958,6 +5125,13 @@ BaseType_t xTaskNotifyStateClear (TaskHandle_t xTask)
 #endif /* configUSE_TASK_NOTIFICATIONS */
 /*-----------------------------------------------------------*/
 
+#if((configGENERATE_RUN_TIME_STATS == 1) && (INCLUDE_xTaskGetIdleTaskHandle == 1))
+																														TickType_t xTaskGetIdleRunTimeCounter( void )
+	{
+		return xIdleTaskHandle->ulRunTimeCounter;
+	}
+#endif
+/*-----------------------------------------------------------*/
 
 static void
 prvAddCurrentTaskToDelayedList (TickType_t xTicksToWait, const BaseType_t xCanBlockIndefinitely)
@@ -4980,7 +5154,7 @@ prvAddCurrentTaskToDelayedList (TickType_t xTicksToWait, const BaseType_t xCanBl
 	{
 	  /* The current task must be in a ready list, so there is no need to
 		check, and the port reset macro can be called directly. */
-	  portRESET_READY_PRIORITY(pxCurrentTCB->uxPriority, uxTopReadyPriority);
+	  portRESET_READY_PRIORITY(pxCurrentTCB->uxPriority, uxTopReadyPriority); /*lint !e931 pxCurrentTCB cannot change as it is the calling task.  pxCurrentTCB->uxPriority and uxTopReadyPriority cannot change as called with scheduler suspended or in a critical section. */
 	}
   else
 	{
@@ -5083,12 +5257,12 @@ when performing module tests). */
 
 																														#include "freertos_tasks_c_additions.h"
 
-	static void freertos_tasks_c_additions_init( void )
-	{
-		#ifdef FREERTOS_TASKS_C_ADDITIONS_INIT
+	#ifdef FREERTOS_TASKS_C_ADDITIONS_INIT
+		static void freertos_tasks_c_additions_init( void )
+		{
 			FREERTOS_TASKS_C_ADDITIONS_INIT();
-		#endif
-	}
+		}
+	#endif
 
 #endif
 
