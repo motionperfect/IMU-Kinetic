@@ -32,8 +32,6 @@ extern "C" {
 
 #include "Utils/ErrorHandler.h"
 
-#define __START main
-
 #define M24SR64_Y_RF_DISABLE_Pin GPIO_PIN_2
 #define M24SR64_Y_RF_DISABLE_GPIO_Port GPIOE
 #define USB_OTG_FS_OVRCR_EXTI3_Pin GPIO_PIN_3

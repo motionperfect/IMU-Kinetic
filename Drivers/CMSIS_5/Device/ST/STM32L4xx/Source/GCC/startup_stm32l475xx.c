@@ -1,5 +1,5 @@
-/* File: startup_ARMCM4.c
- * Purpose: startup file for Cortex-M4 devices.
+/* File: startup_stm32l475xx.c
+ * Purpose: startup file for STM32L475 devices.
  *          Should be used with GCC 'GNU Tools ARM Embedded'
  * Version: V1.01
  * Date: 12 June 2014
@@ -71,9 +71,8 @@ extern void SystemInit (void);            /* CMSIS System Initialization      */
 /*----------------------------------------------------------------------------
   Internal References
  *----------------------------------------------------------------------------*/
-void
-Default_Handler (void);                          /* Default empty handler */
-void Reset_Handler (void);                            /* Reset Handler */
+void Default_Handler (void);              /* Default empty handler */
+void Reset_Handler (void);                /* Reset Handler */
 
 
 /*----------------------------------------------------------------------------
@@ -106,7 +105,7 @@ void DebugMon_Handler (void) __attribute__ ((weak, alias("Default_Handler")));
 void PendSV_Handler (void) __attribute__ ((weak, alias("Default_Handler")));
 void SysTick_Handler (void) __attribute__ ((weak, alias("Default_Handler")));
 
-/* ARMCM4 Specific Interrupts */
+/* STM32L475 Specific Interrupts */
 void WWDG_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
 void PVD_PVM_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
 void
@@ -223,7 +222,7 @@ void FPU_IRQHandler (void) __attribute__ ((weak, alias("Default_Handler")));
   Exception / Interrupt Vector table
  *----------------------------------------------------------------------------*/
 const pFunc __Vectors[] __attribute__ ((section(".vectors"))) = {
-    /* Cortex-M4 Exceptions Handler */
+    /* STM32L475 Exceptions Handler */
     (pFunc)&__StackTop,                       /*      Initial Stack Pointer     */
     Reset_Handler,                            /*      Reset Handler             */
     NMI_Handler,                              /*      NMI Handler               */
@@ -438,6 +437,5 @@ void Reset_Handler (void)
  *----------------------------------------------------------------------------*/
 void Default_Handler (void)
 {
-
   while (1);
 }

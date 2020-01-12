@@ -40,17 +40,17 @@ static void vStartMeasurementTask (void *pvArgument)
   BSP_GYRO_Init ();
   for (;;)
 	{
-	  BSP_ACCELERO_AccGetXYZ (sAcceleroDataXYZ);
-	  BSP_GYRO_GetXYZ (fGyroDataXYZ);
+      BSP_ACCELERO_AccGetXYZ (sAcceleroDataXYZ);
+      BSP_GYRO_GetXYZ (fGyroDataXYZ);
 
-	  configPRINTF (("Accelerometer: [X: %d, Y: %d, Z: Z: %d] Gyroscope: [X: %f, Y: %f, Z: %f]\n",
-		  sAcceleroDataXYZ[0],
-		  sAcceleroDataXYZ[1],
-		  sAcceleroDataXYZ[2],
-		  fGyroDataXYZ[0],
-		  fGyroDataXYZ[1],
-		  fGyroDataXYZ[2]));
+      configPRINTF (("Accelerometer: [X: %d, Y: %d, Z: %d] Gyroscope: [X: %f, Y: %f, Z: %f]\n",
+          sAcceleroDataXYZ[0],
+          sAcceleroDataXYZ[1],
+          sAcceleroDataXYZ[2],
+          fGyroDataXYZ[0],
+          fGyroDataXYZ[1],
+          fGyroDataXYZ[2]));
 
-	  osDelay (64); // 1000 / 208
-	}
+      osDelay (64); // 1000 / 208
+    }
 }
