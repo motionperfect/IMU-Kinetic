@@ -29,7 +29,6 @@ set(PREFIX "arm-none-eabi-")
 
 set(CMAKE_CXX_COMPILER "${GCC_PATH}/${PREFIX}g++")
 set(CMAKE_C_COMPILER "${GCC_PATH}/${PREFIX}gcc")
-set(CMAKE_ASM_COMPILER "${GCC_PATH}/${PREFIX}gcc")
 set(CMAKE_OBJCOPY "${GCC_PATH}/${PREFIX}objcopy")
 
 #######################################
@@ -57,12 +56,11 @@ set(MCU_LINKER_SCRIPT "STM32L475VGTx_FLASH.ld")
 set(LIBS "-lc -lm -lnosys")
 set(LIBDIR "")
 
-set(COMMON_FLAGS "${MCU} -specs=nano.specs ${LIBDIR} ${LIBS} ${OPT} -Wall -fdata-sections -ffunction-sections")
+set(COMMON_FLAGS "${MCU} -specs=nosys.specs ${LIBDIR} ${LIBS} ${OPT} -Wall -fdata-sections -ffunction-sections")
 
 # set(COMMON_FLAGS "${MCU_ARCH} -lc -specs=nosys.specs -mthumb -mthumb-interwork -ffunction-sections -fdata-sections -fno-common -fmessage-length=0")
 
 set(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
 set(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
-set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} -x assembler-with-cpp")
 
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-gc-sections -T${CMAKE_SOURCE_DIR}/${MCU_LINKER_SCRIPT}")

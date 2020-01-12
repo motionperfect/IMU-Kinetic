@@ -1,11 +1,11 @@
 /**************************************************************************//**
  * @file     cmsis_gcc.h
  * @brief    CMSIS compiler GCC header file
- * @version  V5.0.4
- * @date     09. April 2018
+ * @version  V5.2.0
+ * @date     08. May 2019
  ******************************************************************************/
 /*
- * Copyright (c) 2009-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -113,7 +113,80 @@ __PACKED_STRUCT T_UINT32_READ { uint32_t v; };
 #ifndef   __RESTRICT
 #define __RESTRICT                             __restrict
 #endif
+#ifndef   __COMPILER_BARRIER
+#define __COMPILER_BARRIER()                   __ASM volatile("":::"memory")
+#endif
 
+/* #########################  Startup and Lowlevel Init  ######################## */
+
+#ifndef __PROGRAM_START
+
+/**
+  \brief   Initializes data and bss sections
+  \details This default implementations initialized all data and additional bss
+           sections relying on .copy.table and .zero.table specified properly
+           in the used linker script.
+  
+ */
+__STATIC_FORCEINLINE __NO_RETURN void __cmsis_start (void)
+{
+  extern void _start (void) __NO_RETURN;
+
+  typedef struct {
+    uint32_t const *src;
+    uint32_t *dest;
+    uint32_t wlen;
+  } __copy_table_t;
+
+  typedef struct {
+    uint32_t *dest;
+    uint32_t wlen;
+  } __zero_table_t;
+
+  extern const __copy_table_t __copy_table_start__;
+  extern const __copy_table_t __copy_table_end__;
+  extern const __zero_table_t __zero_table_start__;
+  extern const __zero_table_t __zero_table_end__;
+
+  for (__copy_table_t const *pTable = &__copy_table_start__;
+      pTable < &__copy_table_end__; ++pTable)
+    {
+      for (uint32_t i = 0u; i < pTable->wlen; ++i)
+        {
+          pTable->dest[i] = pTable->src[i];
+        }
+    }
+
+  for (__zero_table_t const *pTable = &__zero_table_start__;
+      pTable < &__zero_table_end__; ++pTable)
+    {
+      for (uint32_t i = 0u; i < pTable->wlen; ++i)
+        {
+          pTable->dest[i] = 0u;
+        }
+    }
+
+  _start ();
+}
+
+#define __PROGRAM_START           __cmsis_start
+#endif
+
+#ifndef __INITIAL_SP
+#define __INITIAL_SP              __StackTop
+#endif
+
+#ifndef __STACK_LIMIT
+#define __STACK_LIMIT             __StackLimit
+#endif
+
+#ifndef __VECTOR_TABLE
+#define __VECTOR_TABLE            __Vectors
+#endif
+
+#ifndef __VECTOR_TABLE_ATTRIBUTE
+#define __VECTOR_TABLE_ATTRIBUTE  __attribute((used, section(".vectors")))
+#endif
 
 /* ###########################  Core Function Access  ########################### */
 /** \ingroup  CMSIS_Core_FunctionInterface
@@ -340,6 +413,7 @@ __STATIC_FORCEINLINE void __TZ_set_MSP_NS(uint32_t topOfMainStack)
 }
 #endif
 
+
 #if (defined (__ARM_FEATURE_CMSE ) && (__ARM_FEATURE_CMSE == 3))
 /**
   \brief   Get Stack Pointer (non-secure)
@@ -562,6 +636,7 @@ __STATIC_FORCEINLINE void __TZ_set_FAULTMASK_NS(uint32_t faultMask)
            (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) || \
            (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1))    ) */
 
+
 #if ((defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) || \
      (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)))
 
@@ -577,14 +652,14 @@ __STATIC_FORCEINLINE void __TZ_set_FAULTMASK_NS(uint32_t faultMask)
 __STATIC_FORCEINLINE uint32_t __get_PSPLIM(void)
 {
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	(!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
-	// without main extensions, the non-secure PSPLIM is RAZ/WI
+    (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+    // without main extensions, the non-secure PSPLIM is RAZ/WI
   return 0U;
-  #else
+#else
   uint32_t result;
   __ASM volatile ("MRS %0, psplim"  : "=r" (result) );
   return result;
-  #endif
+#endif
 }
 
 #if (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3))
@@ -601,11 +676,11 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_PSPLIM_NS(void)
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)))
   // without main extensions, the non-secure PSPLIM is RAZ/WI
   return 0U;
-  #else
+#else
   uint32_t result;
   __ASM volatile ("MRS %0, psplim_ns"  : "=r" (result) );
   return result;
-  #endif
+#endif
 }
 #endif
 
@@ -615,19 +690,19 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_PSPLIM_NS(void)
   Devices without ARMv8-M Main Extensions (i.e. Cortex-M23) lack the non-secure
   Stack Pointer Limit register hence the write is silently ignored in non-secure
   mode.
-
+  
   \details Assigns the given value to the Process Stack Pointer Limit (PSPLIM).
   \param [in]    ProcStackPtrLimit  Process Stack Pointer Limit value to set
  */
 __STATIC_FORCEINLINE void __set_PSPLIM(uint32_t ProcStackPtrLimit)
 {
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	(!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+    (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
   // without main extensions, the non-secure PSPLIM is RAZ/WI
   (void)ProcStackPtrLimit;
-  #else
+#else
   __ASM volatile ("MSR psplim, %0" : : "r" (ProcStackPtrLimit));
-  #endif
+#endif
 }
 
 
@@ -645,9 +720,9 @@ __STATIC_FORCEINLINE void __TZ_set_PSPLIM_NS(uint32_t ProcStackPtrLimit)
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)))
   // without main extensions, the non-secure PSPLIM is RAZ/WI
   (void)ProcStackPtrLimit;
-  #else
+#else
   __ASM volatile ("MSR psplim_ns, %0\n" : : "r" (ProcStackPtrLimit));
-  #endif
+#endif
 }
 #endif
 
@@ -664,14 +739,14 @@ __STATIC_FORCEINLINE void __TZ_set_PSPLIM_NS(uint32_t ProcStackPtrLimit)
 __STATIC_FORCEINLINE uint32_t __get_MSPLIM(void)
 {
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	(!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+    (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
   // without main extensions, the non-secure MSPLIM is RAZ/WI
   return 0U;
-  #else
+#else
   uint32_t result;
   __ASM volatile ("MRS %0, msplim" : "=r" (result) );
   return result;
-  #endif
+#endif
 }
 
 
@@ -689,11 +764,11 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_MSPLIM_NS(void)
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)))
   // without main extensions, the non-secure MSPLIM is RAZ/WI
   return 0U;
-  #else
+#else
   uint32_t result;
   __ASM volatile ("MRS %0, msplim_ns" : "=r" (result) );
   return result;
-  #endif
+#endif
 }
 #endif
 
@@ -710,12 +785,12 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_MSPLIM_NS(void)
 __STATIC_FORCEINLINE void __set_MSPLIM(uint32_t MainStackPtrLimit)
 {
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	(!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+    (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
   // without main extensions, the non-secure MSPLIM is RAZ/WI
   (void)MainStackPtrLimit;
-  #else
+#else
   __ASM volatile ("MSR msplim, %0" : : "r" (MainStackPtrLimit));
-  #endif
+#endif
 }
 
 
@@ -733,9 +808,9 @@ __STATIC_FORCEINLINE void __TZ_set_MSPLIM_NS(uint32_t MainStackPtrLimit)
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)))
   // without main extensions, the non-secure MSPLIM is RAZ/WI
   (void)MainStackPtrLimit;
-  #else
+#else
   __ASM volatile ("MSR msplim_ns, %0" : : "r" (MainStackPtrLimit));
-  #endif
+#endif
 }
 #endif
 
@@ -755,14 +830,14 @@ __STATIC_FORCEINLINE uint32_t __get_FPSCR (void)
   #if __has_builtin(__builtin_arm_get_fpscr)
   // Re-enable using built-in when GCC has been fixed
   // || (__GNUC__ > 7) || (__GNUC__ == 7 && __GNUC_MINOR__ >= 2)
-	/* see https://gcc.gnu.org/ml/gcc-patches/2017-04/msg00443.html */
-	return __builtin_arm_get_fpscr();
-	#else
-	uint32_t result;
+    /* see https://gcc.gnu.org/ml/gcc-patches/2017-04/msg00443.html */
+    return __builtin_arm_get_fpscr();
+    #else
+    uint32_t result;
 
-	__ASM volatile ("VMRS %0, fpscr" : "=r" (result) );
-	return(result);
-	#endif
+    __ASM volatile ("VMRS %0, fpscr" : "=r" (result) );
+    return(result);
+    #endif
   #else
   return (0U);
   #endif
@@ -781,11 +856,11 @@ __STATIC_FORCEINLINE void __set_FPSCR (uint32_t fpscr)
   #if __has_builtin(__builtin_arm_set_fpscr)
   // Re-enable using built-in when GCC has been fixed
   // || (__GNUC__ > 7) || (__GNUC__ == 7 && __GNUC_MINOR__ >= 2)
-	/* see https://gcc.gnu.org/ml/gcc-patches/2017-04/msg00443.html */
-	__builtin_arm_set_fpscr(fpscr);
-	#else
-	__ASM volatile ("VMSR fpscr, %0" : : "r" (fpscr) : "vfpcc", "memory");
-	#endif
+    /* see https://gcc.gnu.org/ml/gcc-patches/2017-04/msg00443.html */
+    __builtin_arm_set_fpscr(fpscr);
+    #else
+    __ASM volatile ("VMSR fpscr, %0" : : "r" (fpscr) : "vfpcc", "memory");
+    #endif
   #else
   (void)fpscr;
   #endif
@@ -940,9 +1015,9 @@ __STATIC_FORCEINLINE uint32_t __ROR (uint32_t op1, uint32_t op2)
 {
   op2 %= 32U;
   if (op2 == 0U)
-	{
-	  return op1;
-	}
+    {
+      return op1;
+    }
   return (op1 >> op2) | (op1 << (32U - op2));
 }
 
@@ -977,9 +1052,9 @@ __STATIC_FORCEINLINE uint32_t __RBIT (uint32_t value)
   result = value;                      /* r will be reversed bits of v; first get LSB of v */
   for (value >>= 1U; value != 0U; value >>= 1U)
   {
-	result <<= 1U;
-	result |= value & 1U;
-	s--;
+    result <<= 1U;
+    result |= value & 1U;
+    s--;
   }
   result <<= s;                        /* shift when v's highest bits are zero */
   #endif
@@ -993,7 +1068,23 @@ __STATIC_FORCEINLINE uint32_t __RBIT (uint32_t value)
   \param [in]  value  Value to count the leading zeros
   \return             number of leading zeros in value
  */
-#define __CLZ             (uint8_t)__builtin_clz
+__STATIC_FORCEINLINE uint8_t __CLZ (uint32_t value)
+{
+  /* Even though __builtin_clz produces a CLZ instruction on ARM, formally
+     __builtin_clz(0) is undefined behaviour, so handle this case specially.
+     This guarantees ARM-compatible results if happening to compile on a non-ARM
+     target, and ensures the compiler doesn't decide to activate any
+     optimisations using the logic "value was passed to __builtin_clz, so it
+     is non-zero".
+     ARM GCC 7.3 and possibly earlier will optimise this test away, leaving a
+     single CLZ instruction.
+   */
+  if (value == 0U)
+    {
+      return 32U;
+    }
+  return __builtin_clz (value);
+}
 
 #if ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__ == 1)) || \
      (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__ == 1)) || \
@@ -1013,7 +1104,7 @@ __STATIC_FORCEINLINE uint8_t __LDREXB (volatile uint8_t *addr)
   __ASM volatile ("ldrexb %0, %1" : "=r" (result) : "Q" (*addr));
   #else
   /* Prior to GCC 4.8, "Q" will be expanded to [rx, #0] which is not
-	 accepted by assembler. So has to use following less efficient pattern.
+     accepted by assembler. So has to use following less efficient pattern.
   */
  __ASM volatile ("ldrexb %0, [%1]" : "=r" (result) : "r" (addr) : "memory" );
   #endif
@@ -1035,7 +1126,7 @@ __STATIC_FORCEINLINE uint16_t __LDREXH (volatile uint16_t *addr)
   __ASM volatile ("ldrexh %0, %1" : "=r" (result) : "Q" (*addr));
   #else
   /* Prior to GCC 4.8, "Q" will be expanded to [rx, #0] which is not
-	 accepted by assembler. So has to use following less efficient pattern.
+     accepted by assembler. So has to use following less efficient pattern.
   */
  __ASM volatile ("ldrexh %0, [%1]" : "=r" (result) : "r" (addr) : "memory" );
   #endif
@@ -1188,7 +1279,7 @@ __STATIC_FORCEINLINE uint8_t __LDRBT (volatile uint8_t *ptr)
   __ASM volatile ("ldrbt %0, %1" : "=r" (result) : "Q" (*ptr));
   #else
   /* Prior to GCC 4.8, "Q" will be expanded to [rx, #0] which is not
-	 accepted by assembler. So has to use following less efficient pattern.
+     accepted by assembler. So has to use following less efficient pattern.
   */
  __ASM volatile ("ldrbt %0, [%1]" : "=r" (result) : "r" (ptr) : "memory" );
   #endif
@@ -1210,7 +1301,7 @@ __STATIC_FORCEINLINE uint16_t __LDRHT (volatile uint16_t *ptr)
   __ASM volatile ("ldrht %0, %1" : "=r" (result) : "Q" (*ptr));
   #else
   /* Prior to GCC 4.8, "Q" will be expanded to [rx, #0] which is not
-	 accepted by assembler. So has to use following less efficient pattern.
+     accepted by assembler. So has to use following less efficient pattern.
   */
  __ASM volatile ("ldrht %0, [%1]" : "=r" (result) : "r" (ptr) : "memory" );
   #endif
@@ -1283,16 +1374,16 @@ __STATIC_FORCEINLINE int32_t __SSAT(int32_t val, uint32_t sat)
 {
   if ((sat >= 1U) && (sat <= 32U))
   {
-	const int32_t max = (int32_t)((1U << (sat - 1U)) - 1U);
-	const int32_t min = -1 - max ;
-	if (val > max)
-	{
-	  return max;
-	}
-	else if (val < min)
-	{
-	  return min;
-	}
+    const int32_t max = (int32_t)((1U << (sat - 1U)) - 1U);
+    const int32_t min = -1 - max ;
+    if (val > max)
+    {
+      return max;
+    }
+    else if (val < min)
+    {
+      return min;
+    }
   }
   return val;
 }
@@ -1308,15 +1399,15 @@ __STATIC_FORCEINLINE uint32_t __USAT(int32_t val, uint32_t sat)
 {
   if (sat <= 31U)
   {
-	const uint32_t max = ((1U << sat) - 1U);
-	if (val > (int32_t)max)
-	{
-	  return max;
-	}
-	else if (val < 0)
-	{
-	  return 0U;
-	}
+    const uint32_t max = ((1U << sat) - 1U);
+    if (val > (int32_t)max)
+    {
+      return max;
+    }
+    else if (val < 0)
+    {
+      return 0U;
+    }
   }
   return (uint32_t)val;
 }
@@ -1324,6 +1415,7 @@ __STATIC_FORCEINLINE uint32_t __USAT(int32_t val, uint32_t sat)
 #endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) || \
            (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) || \
            (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1))    ) */
+
 
 #if ((defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) || \
      (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1)))
@@ -1335,7 +1427,7 @@ __STATIC_FORCEINLINE uint32_t __USAT(int32_t val, uint32_t sat)
  */
 __STATIC_FORCEINLINE uint8_t __LDAB(volatile uint8_t *ptr)
 {
-	uint32_t result;
+    uint32_t result;
 
    __ASM volatile ("ldab %0, %1" : "=r" (result) : "Q" (*ptr) );
    return ((uint8_t) result);
@@ -1350,7 +1442,7 @@ __STATIC_FORCEINLINE uint8_t __LDAB(volatile uint8_t *ptr)
  */
 __STATIC_FORCEINLINE uint16_t __LDAH(volatile uint16_t *ptr)
 {
-	uint32_t result;
+    uint32_t result;
 
    __ASM volatile ("ldah %0, %1" : "=r" (result) : "Q" (*ptr) );
    return ((uint16_t) result);
@@ -1365,7 +1457,7 @@ __STATIC_FORCEINLINE uint16_t __LDAH(volatile uint16_t *ptr)
  */
 __STATIC_FORCEINLINE uint32_t __LDA(volatile uint32_t *ptr)
 {
-	uint32_t result;
+    uint32_t result;
 
    __ASM volatile ("lda %0, %1" : "=r" (result) : "Q" (*ptr) );
    return(result);
@@ -1416,7 +1508,7 @@ __STATIC_FORCEINLINE void __STL(uint32_t value, volatile uint32_t *ptr)
  */
 __STATIC_FORCEINLINE uint8_t __LDAEXB(volatile uint8_t *ptr)
 {
-	uint32_t result;
+    uint32_t result;
 
    __ASM volatile ("ldaexb %0, %1" : "=r" (result) : "Q" (*ptr) );
    return ((uint8_t) result);
@@ -1431,7 +1523,7 @@ __STATIC_FORCEINLINE uint8_t __LDAEXB(volatile uint8_t *ptr)
  */
 __STATIC_FORCEINLINE uint16_t __LDAEXH(volatile uint16_t *ptr)
 {
-	uint32_t result;
+    uint32_t result;
 
    __ASM volatile ("ldaexh %0, %1" : "=r" (result) : "Q" (*ptr) );
    return ((uint16_t) result);
@@ -1446,7 +1538,7 @@ __STATIC_FORCEINLINE uint16_t __LDAEXH(volatile uint16_t *ptr)
  */
 __STATIC_FORCEINLINE uint32_t __LDAEX(volatile uint32_t *ptr)
 {
-	uint32_t result;
+    uint32_t result;
 
    __ASM volatile ("ldaex %0, %1" : "=r" (result) : "Q" (*ptr) );
    return(result);
@@ -1905,8 +1997,8 @@ __STATIC_FORCEINLINE uint64_t
 __SMLALD (uint32_t op1, uint32_t op2, uint64_t acc)
 {
   union llreg_u {
-	uint32_t w32[2];
-	uint64_t w64;
+    uint32_t w32[2];
+    uint64_t w64;
   } llr;
   llr.w64 = acc;
 
@@ -1923,8 +2015,8 @@ __STATIC_FORCEINLINE uint64_t
 __SMLALDX (uint32_t op1, uint32_t op2, uint64_t acc)
 {
   union llreg_u {
-	uint32_t w32[2];
-	uint64_t w64;
+    uint32_t w32[2];
+    uint64_t w64;
   } llr;
   llr.w64 = acc;
 
@@ -1974,8 +2066,8 @@ __STATIC_FORCEINLINE uint64_t
 __SMLSLD (uint32_t op1, uint32_t op2, uint64_t acc)
 {
   union llreg_u {
-	uint32_t w32[2];
-	uint64_t w64;
+    uint32_t w32[2];
+    uint64_t w64;
   } llr;
   llr.w64 = acc;
 
@@ -1992,8 +2084,8 @@ __STATIC_FORCEINLINE uint64_t
 __SMLSLDX (uint32_t op1, uint32_t op2, uint64_t acc)
 {
   union llreg_u {
-	uint32_t w32[2];
-	uint64_t w64;
+    uint32_t w32[2];
+    uint64_t w64;
   } llr;
   llr.w64 = acc;
 
@@ -2042,9 +2134,9 @@ __STATIC_FORCEINLINE int32_t __QSUB (int32_t op1, int32_t op2)
 ({                          \
   uint32_t __RES, __ARG1 = (ARG1), __ARG2 = (ARG2); \
   if (ARG3 == 0) \
-	__ASM ("pkhtb %0, %1, %2" : "=r" (__RES) :  "r" (__ARG1), "r" (__ARG2)  ); \
+    __ASM ("pkhtb %0, %1, %2" : "=r" (__RES) :  "r" (__ARG1), "r" (__ARG2)  ); \
   else \
-	__ASM ("pkhtb %0, %1, %2, asr %3" : "=r" (__RES) :  "r" (__ARG1), "r" (__ARG2), "I" (ARG3)  ); \
+    __ASM ("pkhtb %0, %1, %2, asr %3" : "=r" (__RES) :  "r" (__ARG1), "r" (__ARG2), "I" (ARG3)  ); \
   __RES; \
  })
 #endif

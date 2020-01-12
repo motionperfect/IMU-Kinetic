@@ -39,10 +39,7 @@ void NMI_Handler (void)
   */
 void HardFault_Handler (void)
 {
-  while (1)
-	{
-
-	}
+  for (;;);
 }
 
 /**
@@ -50,10 +47,7 @@ void HardFault_Handler (void)
   */
 void MemManage_Handler (void)
 {
-  while (1)
-	{
-
-	}
+  for (;;);
 }
 
 /**
@@ -61,10 +55,7 @@ void MemManage_Handler (void)
   */
 void BusFault_Handler (void)
 {
-  while (1)
-	{
-
-	}
+  for (;;);
 }
 
 /**
@@ -72,10 +63,7 @@ void BusFault_Handler (void)
   */
 void UsageFault_Handler (void)
 {
-  while (1)
-	{
-
-	}
+  for (;;);
 }
 
 /**

@@ -1,13 +1,14 @@
 /**************************************************************************//**
  * @file     cmsis_iccarm.h
  * @brief    CMSIS compiler ICCARM (IAR Compiler for Arm) header file
- * @version  V5.0.7
- * @date     19. June 2018
+ * @version  V5.1.0
+ * @date     08. May 2019
  ******************************************************************************/
 
 //------------------------------------------------------------------------------
 //
-// Copyright (c) 2017-2018 IAR Systems
+// Copyright (c) 2017-2019 IAR Systems
+// Copyright (c) 2017-2019 Arm Limited. All rights reserved. 
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -107,6 +108,10 @@
 #define __ASM __asm
 #endif
 
+#ifndef   __COMPILER_BARRIER
+#define __COMPILER_BARRIER() __ASM volatile("":::"memory")
+#endif
+
 #ifndef __INLINE
 #define __INLINE inline
 #endif
@@ -147,7 +152,12 @@
 #endif
 
 #ifndef   __RESTRICT
+#if __ICCARM_V8
 #define __RESTRICT            __restrict
+#else
+/* Needs IAR language extensions */
+#define __RESTRICT            restrict
+#endif
 #endif
 
 #ifndef   __STATIC_INLINE
@@ -236,6 +246,26 @@ __packed struct __iar_u32 { uint32_t v; };
 #endif
 #endif
 
+#ifndef __PROGRAM_START
+#define __PROGRAM_START           __iar_program_start
+#endif
+
+#ifndef __INITIAL_SP
+#define __INITIAL_SP              CSTACK$$Limit
+#endif
+
+#ifndef __STACK_LIMIT
+#define __STACK_LIMIT             CSTACK$$Base
+#endif
+
+#ifndef __VECTOR_TABLE
+#define __VECTOR_TABLE            __vector_table
+#endif
+
+#ifndef __VECTOR_TABLE_ATTRIBUTE
+#define __VECTOR_TABLE_ATTRIBUTE  @".intvec"
+#endif
+
 #ifndef __ICCARM_INTRINSICS_VERSION__
 #define __ICCARM_INTRINSICS_VERSION__  0
 #endif
@@ -274,7 +304,7 @@ __packed struct __iar_u32 { uint32_t v; };
 #define __get_FAULTMASK()           (__arm_rsr("FAULTMASK"))
 
 #if ((defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
-	   (defined (__FPU_USED   ) && (__FPU_USED    == 1U))     )
+       (defined (__FPU_USED   ) && (__FPU_USED    == 1U))     )
 #define __get_FPSCR()             (__arm_rsr("FPSCR"))
 #define __set_FPSCR(VALUE)        (__arm_wsr("FPSCR", (VALUE)))
 #else
@@ -285,7 +315,7 @@ __packed struct __iar_u32 { uint32_t v; };
 #define __get_IPSR()                (__arm_rsr("IPSR"))
 #define __get_MSP()                 (__arm_rsr("MSP"))
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	   (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+       (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
 // without main extensions, the non-secure MSPLIM is RAZ/WI
 #define __get_MSPLIM()            (0U)
 #else
@@ -295,7 +325,7 @@ __packed struct __iar_u32 { uint32_t v; };
 #define __get_PSP()                 (__arm_rsr("PSP"))
 
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	   (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+       (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
 // without main extensions, the non-secure PSPLIM is RAZ/WI
 #define __get_PSPLIM()            (0U)
 #else
@@ -311,7 +341,7 @@ __packed struct __iar_u32 { uint32_t v; };
 #define __set_MSP(VALUE)            (__arm_wsr("MSP", (VALUE)))
 
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	   (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+       (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
 // without main extensions, the non-secure MSPLIM is RAZ/WI
 #define __set_MSPLIM(VALUE)       ((void)(VALUE))
 #else
@@ -320,7 +350,7 @@ __packed struct __iar_u32 { uint32_t v; };
 #define __set_PRIMASK(VALUE)        (__arm_wsr("PRIMASK", (VALUE)))
 #define __set_PSP(VALUE)            (__arm_wsr("PSP", (VALUE)))
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	   (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+       (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
 // without main extensions, the non-secure PSPLIM is RAZ/WI
 #define __set_PSPLIM(VALUE)       ((void)(VALUE))
 #else
@@ -343,7 +373,7 @@ __packed struct __iar_u32 { uint32_t v; };
 #define __TZ_set_FAULTMASK_NS(VALUE)(__arm_wsr("FAULTMASK_NS", (VALUE)))
 
 #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-	   (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
+       (!defined (__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
 // without main extensions, the non-secure PSPLIM is RAZ/WI
 #define __TZ_get_PSPLIM_NS()      (0U)
 #define __TZ_set_PSPLIM_NS(VALUE) ((void)(VALUE))
@@ -502,8 +532,8 @@ return (int16_t) __iar_builtin_REVSH(val);
 
    while ((data & mask) == 0U)
    {
-	 count += 1U;
-	 mask = mask >> 1U;
+     count += 1U;
+     mask = mask >> 1U;
    }
    return count;
  }
@@ -514,9 +544,9 @@ return (int16_t) __iar_builtin_REVSH(val);
    uint32_t r = v;
    for (v >>= 1U; v; v >>= 1U)
    {
-	 r <<= 1U;
-	 r |= v & 1U;
-	 sc--;
+     r <<= 1U;
+     r |= v & 1U;
+     sc--;
    }
    return (r << sc);
  }
@@ -607,7 +637,7 @@ __IAR_FT uint32_t __get_MSPLIM(void)
  {
    uint32_t res;
    #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-		 (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
+         (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
    // without main extensions, the non-secure MSPLIM is RAZ/WI
    res = 0U;
    #else
@@ -619,7 +649,7 @@ __IAR_FT uint32_t __get_MSPLIM(void)
  __IAR_FT void   __set_MSPLIM(uint32_t value)
  {
  #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-		 (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
+         (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
    // without main extensions, the non-secure MSPLIM is RAZ/WI
    (void)value;
    #else
@@ -631,7 +661,7 @@ __IAR_FT uint32_t __get_MSPLIM(void)
  {
    uint32_t res;
    #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-		 (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
+         (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
    // without main extensions, the non-secure PSPLIM is RAZ/WI
    res = 0U;
    #else
@@ -643,7 +673,7 @@ __IAR_FT uint32_t __get_MSPLIM(void)
  __IAR_FT void   __set_PSPLIM(uint32_t value)
  {
  #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-		 (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
+         (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
    // without main extensions, the non-secure PSPLIM is RAZ/WI
    (void)value;
    #else
@@ -738,7 +768,7 @@ __IAR_FT uint32_t __get_MSPLIM(void)
  {
    uint32_t res;
    #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-		 (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
+         (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
    // without main extensions, the non-secure PSPLIM is RAZ/WI
    res = 0U;
    #else
@@ -750,7 +780,7 @@ __IAR_FT uint32_t __get_MSPLIM(void)
  __IAR_FT void   __TZ_set_PSPLIM_NS(uint32_t value)
  {
  #if (!(defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) && \
-		 (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
+         (!defined (__ARM_FEATURE_CMSE  ) || (__ARM_FEATURE_CMSE   < 3)))
    // without main extensions, the non-secure PSPLIM is RAZ/WI
    (void)value;
    #else
@@ -781,16 +811,16 @@ __STATIC_INLINE int32_t __SSAT(int32_t val, uint32_t sat)
 {
   if ((sat >= 1U) && (sat <= 32U))
   {
-	const int32_t max = (int32_t)((1U << (sat - 1U)) - 1U);
-	const int32_t min = -1 - max ;
-	if (val > max)
-	{
-	  return max;
-	}
-	else if (val < min)
-	{
-	  return min;
-	}
+    const int32_t max = (int32_t)((1U << (sat - 1U)) - 1U);
+    const int32_t min = -1 - max ;
+    if (val > max)
+    {
+      return max;
+    }
+    else if (val < min)
+    {
+      return min;
+    }
   }
   return val;
 }
@@ -799,15 +829,15 @@ __STATIC_INLINE uint32_t __USAT(int32_t val, uint32_t sat)
 {
   if (sat <= 31U)
   {
-	const uint32_t max = ((1U << sat) - 1U);
-	if (val > (int32_t)max)
-	{
-	  return max;
-	}
-	else if (val < 0)
-	{
-	  return 0U;
-	}
+    const uint32_t max = ((1U << sat) - 1U);
+    if (val > (int32_t)max)
+    {
+      return max;
+    }
+    else if (val < 0)
+    {
+      return 0U;
+    }
   }
   return (uint32_t)val;
 }
