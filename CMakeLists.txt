@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(MotionPerfect C ASM)
 
+set(TARGET_NAME "${PROJECT_NAME}.elf")
+
 ######################################
 # source
 ######################################
@@ -35,13 +37,20 @@ include_directories(Middlewares/Third_Party/FreeRTOS/Source/include)
 include_directories(Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F)
 include_directories(Middlewares/Third_Party/Printf)
 
-add_executable(${PROJECT_NAME}.elf ${C_SOURCES})
+#######################################
+# LDFLAGS
+#######################################
+# link script
+set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/STM32L475VGTx_FLASH.ld")
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${LINKER_SCRIPT}")
+add_executable(${TARGET_NAME} "${C_SOURCES}")
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
 
-add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${TARGET_NAME}> ${HEX_FILE}
+        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_NAME}> ${BIN_FILE}
         COMMENT "Building ${HEX_FILE}
 Building ${BIN_FILE}")

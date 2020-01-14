@@ -1,9 +1,9 @@
 /* Linker script to configure memory regions. */
 MEMORY
 {
-  RAM (rwx)	: ORIGIN = 0x20000000, LENGTH = 96K
-  RAM2 (rwx)	: ORIGIN = 0x10000000, LENGTH = 32K
-  FLASH (rx)	: ORIGIN = 0x8000000, LENGTH = 1024K
+  RAM2 (rwx) : ORIGIN = 0x10000000, LENGTH = 32K
+  FLASH (rx) : ORIGIN = 0x8000000, LENGTH = 1024K
+  RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 96K
 }
 
 /* Library configurations */
@@ -91,7 +91,6 @@ SECTIONS
 	/* To copy multiple ROM to RAM sections,
 	 * uncomment .copy.table section and,
 	 * define __STARTUP_COPY_MULTIPLE in startup_ARMCMx.S */
-
 	/*
 	.copy.table :
 	{
@@ -99,26 +98,26 @@ SECTIONS
 		__copy_table_start__ = .;
 		LONG (__etext)
 		LONG (__data_start__)
-		LONG ((__data_end__ - __data_start__) / 4)
+		LONG (__data_end__ - __data_start__)
 		LONG (__etext2)
 		LONG (__data2_start__)
-		LONG ((__data2_end__ - __data2_start__) / 4)
+		LONG (__data2_end__ - __data2_start__)
 		__copy_table_end__ = .;
 	} > FLASH
 	*/
 
-
 	/* To clear multiple BSS sections,
 	 * uncomment .zero.table section and,
 	 * define __STARTUP_CLEAR_BSS_MULTIPLE in startup_ARMCMx.S */
-
 	/*
 	.zero.table :
 	{
 		. = ALIGN(4);
 		__zero_table_start__ = .;
 		LONG (__bss_start__)
-		LONG ((__bss_end__ - __bss_start__) / 4)
+		LONG (__bss_end__ - __bss_start__)
+		LONG (__bss2_start__)
+		LONG (__bss2_end__ - __bss2_start__)
 		__zero_table_end__ = .;
 	} > FLASH
 	*/

@@ -84,7 +84,7 @@ void Reset_Handler (void);                /* Reset Handler */
 static uint8_t stack[__STACK_SIZE] __attribute__ ((aligned(8), used, section(".stack")));
 
 #ifndef __HEAP_SIZE
-#define    __HEAP_SIZE   0x00000C00
+#define    __HEAP_SIZE   0x00000200
 #endif
 #if __HEAP_SIZE > 0
 static uint8_t heap[__HEAP_SIZE]   __attribute__ ((aligned(8), used, section(".heap")));
