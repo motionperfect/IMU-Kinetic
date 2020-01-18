@@ -51,8 +51,8 @@ set(MCU "${CPU} -mthumb ${FPU} ${FLOAT-ABI}")
 # LDFLAGS
 #######################################
 # libraries
-set(LIBS "-lc -lm -lnosys")
-set(LIBDIR "")
+set(LIBS "-lc -lm -lnosys -larm_cortexM4lf_math")
+set(LIBDIR "-L${ROOT}/Drivers/CMSIS_5/CMSIS/DSP/Lib/GCC")
 
 # link script
 set(LINKER_SCRIPT "${ROOT}/Drivers/CMSIS_5/Device/ST/STM32L4xx/Source/GCC/STM32L475VGTx_FLASH.ld")
