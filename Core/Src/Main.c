@@ -15,68 +15,19 @@
   *
   ******************************************************************************
   */
-#include <string.h>
-
 #include "Main.h"
 #include "cmsis_os.h"
 
 #include "Peripherals/USART.h"
 #include "Peripherals/GPIO.h"
 
-static void vSystemClockConfig (void);
+void vSystemClockConfig (void);
 void vFreeRTOSInit (void);
 
 /**
  * @brief Initializes the STM32L475 IoT node board.
  *
  * Initialization of clock, LEDs, RNG, RTC, and WIFI module.
- */
-static void prvMiscInitialization (void);
-
-/**
- * Output a character to UART, used by the printf() function
- * \param character Character to output
- */
-void _putchar (char character)
-{
-  const uint32_t ulTimeout = 3000UL;
-
-  HAL_UART_Transmit (&xConsoleUART, (uint8_t *)&character, 1, ulTimeout);
-}
-
-/**
- * Output a string to UART, used by the logger
- * \param pcString String to output
- */
-void vMainUARTPrintString (char *pcString)
-{
-  const uint32_t ulTimeout = 3000UL;
-
-  HAL_UART_Transmit (&xConsoleUART,
-					 (uint8_t *)pcString,
-					 strlen (pcString),
-					 ulTimeout);
-}
-
-int main (void)
-{
-  /*
-   * Perform any hardware initialization that does not require
-   * the RTOS to be running.
-   */
-  prvMiscInitialization ();
-
-  /* Start the scheduler. */
-  if (osKernelStart () != osOK)
-	{
-	  vMainUARTPrintString ("Fatal: µKernel failed to start.\n");
-
-	  for (;;);
-	}
-}
-
-/**
- * @brief Initializes the board.
  */
 // #include <stm32l475e_iot01.h>
 static void prvMiscInitialization (void)
@@ -101,61 +52,20 @@ static void prvMiscInitialization (void)
   vFreeRTOSInit ();
 }
 
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-static void vSystemClockConfig (void)
+int main (void)
 {
-  RCC_OscInitTypeDef xRCCOscInitStruct = {0};
-  RCC_ClkInitTypeDef xRCCClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef xPeriphClkInit = {0};
-
   /*
-   * Initializes the CPU, AHB and APB busses clocks
+   * Perform any hardware initialization that does not require
+   * the RTOS to be running.
    */
-  xRCCOscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  xRCCOscInitStruct.HSIState = RCC_HSI_ON;
-  xRCCOscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  xRCCOscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  xRCCOscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  xRCCOscInitStruct.PLL.PLLM = 1;
-  xRCCOscInitStruct.PLL.PLLN = 20;
-  xRCCOscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
-  xRCCOscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
-  xRCCOscInitStruct.PLL.PLLR = RCC_PLLR_DIV4;
-  if (HAL_RCC_OscConfig (&xRCCOscInitStruct) != HAL_OK)
-	{
-	  vErrorHandler ();
-	}
+  prvMiscInitialization ();
 
-  /*
-   * Initializes the CPU, AHB and APB busses clocks
-   */
-  xRCCClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-								| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-  xRCCClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  xRCCClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  xRCCClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  xRCCClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  /* Start the scheduler. */
+  if (osKernelStart () != osOK)
+	{
+	  vMainUARTPrintString ("Fatal: µKernel failed to start.\n");
 
-  if (HAL_RCC_ClockConfig (&xRCCClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-	{
-	  vErrorHandler ();
-	}
-  xPeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
-  xPeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-  if (HAL_RCCEx_PeriphCLKConfig (&xPeriphClkInit) != HAL_OK)
-	{
-	  vErrorHandler ();
-	}
-
-  /*
-   * Configure the main internal regulator output voltage
-   */
-  if (HAL_PWREx_ControlVoltageScaling (PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
-	{
-	  vErrorHandler ();
+	  for (;;);
 	}
 }
 
