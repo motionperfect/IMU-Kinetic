@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(MotionPerfect C ASM)
-
 set(TARGET_NAME "${PROJECT_NAME}.elf")
+
+include(stm32l4xx.gcc.cmake)
 
 ######################################
 # source
@@ -38,12 +39,8 @@ include_directories(Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4
 include_directories(Middlewares/Third_Party/Printf)
 
 #######################################
-# LDFLAGS
+# executables
 #######################################
-# link script
-set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/STM32L475VGTx_FLASH.ld")
-
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${LINKER_SCRIPT}")
 add_executable(${TARGET_NAME} "${C_SOURCES}")
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)

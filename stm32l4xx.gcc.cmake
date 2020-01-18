@@ -1,13 +1,13 @@
-include(CMakeForceCompiler)
-
-set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(ROOT "${CMAKE_SOURCE_DIR}")
 
 #######################################
 # paths
 #######################################
 # GCC path
-set(GCC_PATH "${CMAKE_SOURCE_DIR}/Tools/gcc-arm-none-eabi-8-2019-q3-update/bin")
+set(GCC_PATH "${ROOT}/Tools/gcc-arm-none-eabi-8-2019-q3-update/bin")
 
 ######################################
 # building variables
@@ -54,10 +54,18 @@ set(MCU "${CPU} -mthumb ${FPU} ${FLOAT-ABI}")
 set(LIBS "-lc -lm -lnosys")
 set(LIBDIR "")
 
+# link script
+set(LINKER_SCRIPT "${ROOT}/Drivers/CMSIS_5/Device/ST/STM32L4xx/Source/GCC/STM32L475VGTx_FLASH.ld")
+
+#######################################
+# GCC flags
+#######################################
+# compilers
 set(COMMON_FLAGS "${MCU} -specs=nosys.specs ${LIBDIR} ${LIBS} ${OPT} -Wall -fdata-sections -ffunction-sections")
 
 set(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -std=c++11")
 set(CMAKE_C_FLAGS "${COMMON_FLAGS} -std=gnu99")
 set(CMAKE_ASM_FLAGS "${COMMON_FLAGS} -x assembler-with-cpp")
 
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,-gc-sections")
+# linkers
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,-gc-sections -T ${LINKER_SCRIPT}")
