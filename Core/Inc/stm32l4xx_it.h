@@ -26,27 +26,6 @@
 extern "C" {
 #endif
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Exported types ------------------------------------------------------------*/
-/* USER CODE BEGIN ET */
-
-/* USER CODE END ET */
-
-/* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
-
-/* USER CODE END EC */
-
-/* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
-
-/* USER CODE END EM */
-
-/* Exported functions prototypes ---------------------------------------------*/
 void NMI_Handler (void);
 void HardFault_Handler (void);
 void MemManage_Handler (void);
@@ -56,9 +35,6 @@ void DebugMon_Handler (void);
 void EXTI9_5_IRQHandler (void);
 void TIM1_UP_TIM16_IRQHandler (void);
 void EXTI15_10_IRQHandler (void);
-/* USER CODE BEGIN EFP */
-
-/* USER CODE END EFP */
 
 #ifdef __cplusplus
 }

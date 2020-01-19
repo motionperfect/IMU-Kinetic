@@ -1,4 +1,3 @@
-/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file    stm32l4xx_hal_timebase_TIM.c 
@@ -16,19 +15,11 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
 
-/* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_hal_tim.h"
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
 
 /**
   * @brief  This function configures the TIM1 as a time base source. 
@@ -47,7 +38,13 @@ HAL_StatusTypeDef HAL_InitTick (uint32_t TickPriority)
   uint32_t pFLatency;
 
   /*Configure the TIM1 IRQ priority */
-  HAL_NVIC_SetPriority (TIM1_UP_TIM16_IRQn, TickPriority, 0);
+  if (TickPriority < (1UL << __NVIC_PRIO_BITS))
+	{
+	  HAL_NVIC_SetPriority (TIM1_UP_TIM16_IRQn, TickPriority, 0);
+	  uwTickPrio = TickPriority;
+	}
+  else
+	return HAL_ERROR;
 
   /* Enable the TIM1 global Interrupt */
   HAL_NVIC_EnableIRQ (TIM1_UP_TIM16_IRQn);

@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.0.1
- * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.2.1
+ * Copyright (C) 2019 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -77,19 +77,19 @@
 
 #if((configCHECK_FOR_STACK_OVERFLOW > 1) && (portSTACK_GROWTH < 0))
 
-#define taskCHECK_FOR_STACK_OVERFLOW()                                                                \
-    {                                                                                                    \
-        const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;                            \
-        const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;                                            \
-                                                                                                        \
-        if( ( pulStack[ 0 ] != ulCheckValue ) ||                                                \
-            ( pulStack[ 1 ] != ulCheckValue ) ||                                                \
-            ( pulStack[ 2 ] != ulCheckValue ) ||                                                \
-            ( pulStack[ 3 ] != ulCheckValue ) )                                                \
-        {                                                                                                \
-            vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName );    \
-        }                                                                                                \
-    }
+#define taskCHECK_FOR_STACK_OVERFLOW()																\
+	{																									\
+		const uint32_t * const pulStack = ( uint32_t * ) pxCurrentTCB->pxStack;							\
+		const uint32_t ulCheckValue = ( uint32_t ) 0xa5a5a5a5;											\
+																										\
+		if( ( pulStack[ 0 ] != ulCheckValue ) ||														\
+			( pulStack[ 1 ] != ulCheckValue ) ||														\
+			( pulStack[ 2 ] != ulCheckValue ) ||														\
+			( pulStack[ 3 ] != ulCheckValue ) )															\
+		{																								\
+			vApplicationStackOverflowHook( ( TaskHandle_t ) pxCurrentTCB, pxCurrentTCB->pcTaskName );	\
+		}																								\
+	}
 
 #endif /* #if( configCHECK_FOR_STACK_OVERFLOW > 1 ) */
 /*-----------------------------------------------------------*/
