@@ -6,10 +6,12 @@
 /*
 ** Math functions
 */
-int8_t sign (float32_t value);
-float32_t mean (uint16_t len, float32_t tab[]);
-float32_t vector_norm (uint16_t len, float32_t vec[]);
-void vector_cross3 (float32_t a[], float32_t b[], float32_t res[]);
+int8_t ucSignOf (const float32_t fValue);
+float32_t fMeanOfArray (uint16_t usLength, const float32_t *const pfArray);
+float32_t fVectorNorm (uint16_t usLength, const float32_t *const pfVector);
+void vCrossProductBetweenVectorOfThree (const float32_t *const pfFirst,
+                                        const float32_t *const pfSecond,
+                                        float32_t *const pfOutput);
 #define ABS(X)  X < 0 ? -X : X
 
 #endif /* !_6DOF_MATH_H */

@@ -14,7 +14,7 @@ enum {
   WRIST,
   NECK,
   BACK
-} typedef jointures;
+} typedef Joint_t;
 
 /**
  * @brief List of jointure states
@@ -24,14 +24,14 @@ enum {
   ACCEPTABLE = 0,
   WARNING,
   RISK
-} typedef jointures_state;
+} typedef JointState_t;
 
 /**
  * @brief Global table of accepted amplitude
  *
  */
-extern float32_t ANGLES_TABLE[];
+extern const float32_t pfCriticalAnglesTable[];
 
-jointures_state check_jointure_angle (float32_t angle, jointures jointure);
+JointState_t eCheckJointAngle (float32_t fAngle, Joint_t eJoint);
 
 #endif /* !_ANGLE_TABLE_H */

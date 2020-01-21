@@ -4,46 +4,50 @@
  * @brief Get the sign of a value
  *        This function can be Inline but don't know how to adapt it to arm
  *
- * @param value Value to check
+ * @param fValue Value to check
  * @return int8_t Get -1 if negative number, 0 if null or 1 if positive number
  */
-int8_t sign (float32_t value)
+int8_t ucSignOf (const float32_t fValue)
 {
-  return value < 0 ? -1 : value > 0;
+  return fValue < 0 ? -1 : fValue > 0;
 }
 
 /**
  * @brief Compute mean value of a float32_t array
  *
- * @param len Array length
- * @param tab Array
+ * @param usLength Array length
+ * @param pfArray Array
  * @return float32_t The mean value
  */
-float32_t mean (uint16_t len, const float32_t tab[])
+float32_t fMeanOfArray (uint16_t usLength, const float32_t *const pfArray)
 {
-  float32_t sum = 0;
-  for (uint16_t i = 0; i < len; i += 1)
-    sum += tab[i];
-  return (sum / (float32_t)len);
+  float32_t fSum = 0.0;
+
+  for (uint16_t usIndex = 0; usIndex < usLength; usIndex += 1)
+    {
+      fSum += pfArray[usIndex];
+    }
+  return fSum / (float32_t)usLength;
 }
 
 /**
  * @brief Compute vector norm
  *
- * @param len Vector length
- * @param vec Vector
+ * @param usLength Vector length
+ * @param pfVector Vector
  * @return float32_t The norm value
  */
-float32_t vector_norm (uint16_t len, const float32_t vec[])
+float32_t fVectorNorm (uint16_t usLength, const float32_t *const pfVector)
 {
-  float32_t sum = 0.;
-  for (uint16_t i = 0; i < len; i += 1)
+  float32_t fSum = 0.0;
+  float32_t fNorm;
+
+  for (uint16_t usIndex = 0; usIndex < usLength; usIndex += 1)
     {
-      sum += vec[i] * vec[i];
+      fSum += pfVector[usIndex] * pfVector[usIndex];
     }
-  float32_t norm;
-  arm_sqrt_f32 (sum, &norm);
-  return norm;
+  arm_sqrt_f32 (fSum, &fNorm);
+  return fNorm;
 }
 
 /**
@@ -52,13 +56,15 @@ float32_t vector_norm (uint16_t len, const float32_t vec[])
  *        y = a.z * b.x - a.x * b.z
  *        z = a.x * b.y - a.y * b.x
  *
- * @param a First Vector
- * @param b Second Vector
- * @param res Output Vector
+ * @param pfFirst First Vector
+ * @param pfSecond Second Vector
+ * @param pfOutput Output Vector
  */
-void vector_cross3 (const float32_t a[], const float32_t b[], float32_t res[])
+void vCrossProductBetweenVectorOfThree (const float32_t *const pfFirst,
+                                        const float32_t *const pfSecond,
+                                        float32_t *const pfOutput)
 {
-  res[0] = a[1] * b[2] - a[2] * b[1];
-  res[1] = a[2] * b[0] - a[0] * b[2];
-  res[2] = a[0] * b[1] - a[1] * b[0];
+  pfOutput[0] = pfFirst[1] * pfSecond[2] - pfFirst[2] * pfSecond[1];
+  pfOutput[1] = pfFirst[2] * pfSecond[0] - pfFirst[0] * pfSecond[2];
+  pfOutput[2] = pfFirst[0] * pfSecond[1] - pfFirst[1] * pfSecond[0];
 }

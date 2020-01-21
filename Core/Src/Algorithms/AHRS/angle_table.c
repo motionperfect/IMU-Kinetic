@@ -4,27 +4,25 @@
  * @brief Global table of accepted amplitude
  *
  */
-float32_t ANGLES_TABLE[] = {
+const float32_t pfCriticalAnglesTable[] = {
     30,   /* ELBOW_EXTENSION */
     10,   /* ELBOW_FLEXION */
     20,   /* SHOULDER */
     35,   /* TMP */
 };
 
-jointures_state check_jointure_angle (float32_t angle, jointures jointure)
+JointState_t eCheckJointAngle (float32_t fAngle, Joint_t eJoint)
 {
-  if (angle < 0)
-    {
-      angle *= -1;
-    }
+  JointState_t eJointState = RISK;
 
-  if (angle * 0.9 <= ANGLES_TABLE[jointure])
+  fAngle = fabsf (fAngle);
+  if (fAngle * 0.9 <= pfCriticalAnglesTable[eJoint])
     {
-      return ACCEPTABLE;
+      eJointState = ACCEPTABLE;
     }
-  else if (angle <= ANGLES_TABLE[jointure])
+  else if (fAngle <= pfCriticalAnglesTable[eJoint])
     {
-      return WARNING;
+      eJointState = WARNING;
     }
-  return RISK;
+  return eJointState;
 }

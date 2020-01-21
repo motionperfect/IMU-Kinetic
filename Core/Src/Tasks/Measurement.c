@@ -32,49 +32,47 @@ void vMeasurementTaskInit (uint32_t ulStackSize, osPriority_t xPriority)
     }
 }
 
-static void fMilliGForceToGForce (arm_6dof_instance_f32 *instance)
+static void prvNormalizeDataForAnalysis (SensorsData_t *const xSensorsData,
+                                         const int16_t *const usAccelerometerData)
 {
-  float32_t divider = 1000.0;
+  const float32_t fDivider = 1000.0;
 
-  instance->acc_x /= divider;
-  instance->acc_y /= divider;
-  instance->acc_z /= divider;
+  xSensorsData->accelerometer.x = (float32_t)usAccelerometerData[0] / fDivider;
+  xSensorsData->gyroscope.x /= fDivider;
 
-  instance->gyr_x /= divider;
-  instance->gyr_y /= divider;
-  instance->gyr_z /= divider;
+  xSensorsData->accelerometer.y = (float32_t)usAccelerometerData[1] / fDivider;
+  xSensorsData->gyroscope.y /= fDivider;
+
+  xSensorsData->accelerometer.z = (float32_t)usAccelerometerData[2] / fDivider;
+  xSensorsData->gyroscope.z /= fDivider;
 }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 static void vStartMeasurementTask (void *pvArgument)
 {
-  int16_t sAcceleroDataXYZ[3];
-  arm_6dof_instance_f32 sensorsData = {0};
+  SensorsData_t xSensorsData = {0};
+  int16_t usAccelerometerData[3];
 
   UNUSED (pvArgument);
   BSP_ACCELERO_Init ();
   BSP_GYRO_Init ();
   for (;;)
     {
-      BSP_ACCELERO_AccGetXYZ (sAcceleroDataXYZ);
-      BSP_GYRO_GetXYZ (&sensorsData.gyr_x);
+      BSP_ACCELERO_AccGetXYZ (usAccelerometerData);
+      BSP_GYRO_GetXYZ ((float *)&xSensorsData.gyroscope);
 
-      sensorsData.acc_x = (float32_t)sAcceleroDataXYZ[0];
-      sensorsData.acc_y = (float32_t)sAcceleroDataXYZ[1];
-      sensorsData.acc_z = (float32_t)sAcceleroDataXYZ[2];
-
-      fMilliGForceToGForce (&sensorsData);
-      jointures_state state = movement_analysis (&sensorsData, SHOULDER);
+      prvNormalizeDataForAnalysis (&xSensorsData, usAccelerometerData);
+      JointState_t eState = eMovementAnalysis (&xSensorsData, SHOULDER);
 
       configPRINTF (("Accelerometer: [X: %f, Y: %f, Z: %f] Gyroscope: [X: %f, Y: %f, Z: %f]\n",
-          sensorsData.acc_x,
-          sensorsData.acc_y,
-          sensorsData.acc_z,
-          sensorsData.gyr_x,
-          sensorsData.gyr_y,
-          sensorsData.gyr_z));
-      configPRINTF(("shoulder state: %d\n", state));
+          xSensorsData.accelerometer.x,
+          xSensorsData.accelerometer.y,
+          xSensorsData.accelerometer.z,
+          xSensorsData.gyroscope.x,
+          xSensorsData.gyroscope.y,
+          xSensorsData.gyroscope.z));
+      configPRINTF(("Shoulder state: %d\n", eState));
 
       osDelay (64); // 1000 / 208
     }

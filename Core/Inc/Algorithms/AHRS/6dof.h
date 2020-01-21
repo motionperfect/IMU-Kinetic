@@ -3,53 +3,65 @@
 
 #include "Algorithms/AHRS/angle_table.h"
 
-// Frequence of the sensor (Hz)
-#define SENSOR_FREQ 208
+// Frequency of the sensor (Hz)
+#define SENSOR_FREQ                 (208)
+
 // Timestamp between two packets (s)
-#define SAMPLE_PERIOD 1 / (float32_t)SENSOR_FREQ
+#define SAMPLE_PERIOD               (1 / (float32_t)SENSOR_FREQ)
+
 // Accelerometer sensitivity of the 6dof sensor
-#define ACCELEROMETER_SENSITIVITY 1.0
+#define ACCELEROMETER_SENSITIVITY   (1.0)
+
 // Gyroscope sensitivity of the 6dof sensor
-#define GYROSCOPE_SENSITIVITY 1.0
+#define GYROSCOPE_SENSITIVITY       (1.0)
+
 // Gravitational constant at 16Bit
-#define G 1.6384
+#define G                           (1.6384)
+
 // Gravitational coefficient for the minimum boundary
-#define G_COEF_MIN 0.5
+#define G_COEF_MIN                  (0.5)
+
 // Gravitational coefficient for the maximum boundary
-#define G_COEF_MAX 2.0
+#define G_COEF_MAX                  (2.0)
+
 // Gyroscope coefficient for the complementary filter
-#define GYR_COEF 0.98
+#define GYR_COEF                    (0.98)
+
 // Accelerometer coefficient for the complementary filter
-#define ACC_COEF 1 - GYR_COEF
+#define ACC_COEF                    (1 - GYR_COEF)
 
 /**
- * @brief 6dof orientation.
+ * @brief Three degrees of freedom (3DOF), refers to tracking of rotational
+ * motion only: pitch, yaw, and roll.
  */
 typedef struct {
   float32_t pitch;    /**< Current X orientation of the 6dof (deg). */
   float32_t roll;        /**< Current Y orientation of the 6dof (deg). */
   float32_t yaw;        /**< Current Z orientation of the 6dof (deg). */
-} arm_6dof_orientation_f32;
+} ThreeDegreeOfFreedom_t;
 
 /**
  * @brief Instance structure for the floating-point 6dof structure.
  */
 typedef struct {
   uint16_t id;        /**< ID of the sensor. */
-  float32_t acc_x;    /**< Accelerometer X (g) of the 6dof. */
-  float32_t acc_y;    /**< Accelerometer Y (g) of the 6dof. */
-  float32_t acc_z;    /**< Accelerometer Z (g) of the 6dof. */
-  float32_t gyr_x;    /**< Gyroscope X (deg/s) of the 6dof. */
-  float32_t gyr_y;    /**< Gyroscope Y (deg/s) of the 6dof. */
-  float32_t gyr_z;    /**< Gyroscope Z (deg/s) of the 6dof. */
-} arm_6dof_instance_f32;
+  struct {
+    float32_t x; // X (g) of the 6dof
+    float32_t y; // Y (g) of the 6dof
+    float32_t z; // Z (g) of the 6dof
+  } accelerometer;
+  struct {
+    float32_t x; // X (deg/s) of the 6dof
+    float32_t y; // Y (deg/s) of the 6dof
+    float32_t z; // Z (deg/s) of the 6dof
+  } gyroscope;
+} SensorsData_t;
 
-/*
-** Algoritm functions
-*/
-
-jointures_state
-movement_analysis (arm_6dof_instance_f32 *dof_data, jointures jointure);
-void arm_6dof_dump_f32 (arm_6dof_instance_f32 *S);
+/**
+ * Algorithm functions
+ */
+JointState_t
+eMovementAnalysis (SensorsData_t *pxSensorsData, Joint_t eJoint);
+void vSixDegreeOfFreedomDump (SensorsData_t *pxSensorsData);
 
 #endif /* !_6_DOF_H */

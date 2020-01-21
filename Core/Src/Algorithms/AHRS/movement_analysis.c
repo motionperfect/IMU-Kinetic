@@ -1,60 +1,88 @@
 #include "Algorithms/AHRS/6dof.h"
 #include <math.h>
 
-arm_6dof_orientation_f32 ORIENTATION = {
+static ThreeDegreeOfFreedom_t xRotation = {
     0, 0, 0
 };
 
-void
-complementary_filter (arm_6dof_instance_f32 *dof_data, float32_t *pitch, float32_t *roll, float32_t *yaw)
+static void
+prvTurnAroundAxe (const float32_t fY, const float32_t fX, float32_t *const pfRotation)
+{
+  const float32_t fArcTangent = atan2f (fY, fX) * 180 / PI;
+
+  *pfRotation *= 0.98 + fArcTangent * 0.02;
+}
+
+static void
+prvAngleAroundAxe (const float32_t fAxe, float32_t *const pfRotation)
+{
+  *pfRotation += (fAxe / GYROSCOPE_SENSITIVITY) * SAMPLE_PERIOD;
+}
+
+static void prvComplementaryFilter (const SensorsData_t *const pxSensorsData,
+                                    float32_t *const pfPitch,
+                                    float32_t *const pfRoll,
+                                    float32_t *const pfYaw)
 {
   /* Integrate the gyroscope data -> int(angularSpeed) = angle */
-  *pitch += (dof_data->gyr_x / GYROSCOPE_SENSITIVITY)
-            * SAMPLE_PERIOD; // Angle around the X-axis
-  *roll += (dof_data->gyr_y / GYROSCOPE_SENSITIVITY)
-           * SAMPLE_PERIOD; // Angle around the Y-axis
-  *yaw += (dof_data->gyr_z / GYROSCOPE_SENSITIVITY)
-          * SAMPLE_PERIOD; // Angle around the Z-axis
+  // Angle around the X-axis
+  prvAngleAroundAxe (pxSensorsData->gyroscope.x, pfPitch);
 
-  /*
-  ** Compensate for drift with accelerometer data if !bullshit
-  ** Sensitivity = -2 to 2 G at 16Bit -> 2G = 32768 && 0.5G = 8192
-  */
-  float32_t force_magnitude_approx =
-      fabsf (dof_data->acc_x) + fabsf (dof_data->acc_y)
-      + fabsf (dof_data->acc_z);
-  if (force_magnitude_approx > G * G_COEF_MIN
-      && force_magnitude_approx < G * G_COEF_MAX)
+  // Angle around the Y-axis
+  prvAngleAroundAxe (pxSensorsData->gyroscope.y, pfRoll);
+
+  // Angle around the Z-axis
+  prvAngleAroundAxe (pxSensorsData->gyroscope.z, pfYaw);
+
+  /**
+   * Compensate for drift with accelerometer data if !bullshit
+   * Sensitivity = -2 to 2 G at 16Bit -> 2G = 32768 && 0.5G = 8192
+   */
+  const float32_t fForceMagnitudeApproximation =
+      fabsf (pxSensorsData->accelerometer.x) +
+      fabsf (pxSensorsData->accelerometer.y) +
+      fabsf (pxSensorsData->accelerometer.z);
+
+  if (fForceMagnitudeApproximation > G * G_COEF_MIN
+      && fForceMagnitudeApproximation < G * G_COEF_MAX)
     {
       /* Turning around the X axis results in a vector on the Y-axis */
-      float32_t pitchAcc = atan2f (dof_data->acc_y, dof_data->acc_z) * 180 / PI;
-      *pitch = *pitch * 0.98 + pitchAcc * 0.02;
+      prvTurnAroundAxe (pxSensorsData->accelerometer.y, pxSensorsData->accelerometer.z, pfPitch);
 
       /* Turning around the Y axis results in a vector on the X-axis */
-      float32_t rollAcc = atan2f (dof_data->acc_x, dof_data->acc_z) * 180 / PI;
-      *roll = *roll * 0.98 + rollAcc * 0.02;
+      prvTurnAroundAxe (pxSensorsData->accelerometer.x, pxSensorsData->accelerometer.z, pfRoll);
 
       /* Turning around the Z axis results in a vector on the Z-axis (not really) */
-      float32_t yawAcc = atanf (dof_data->acc_z / sqrtf (
-          dof_data->acc_x * dof_data->acc_x
-          + dof_data->acc_z * dof_data->acc_z)) * 180 / PI;
-      *yaw = *yaw * 0.98 + yawAcc * 0.02;
+      /*const float32_t fAccelerometerYaw =
+          atanf (pxSensorsData->accelerometer.z / sqrtf (
+              powf (pxSensorsData->accelerometer.x, 2) +
+              powf (pxSensorsData->accelerometer.z, 2)
+          )) * 180 / PI;*/
+      prvTurnAroundAxe (pxSensorsData->accelerometer.z / sqrtf (
+          powf (pxSensorsData->accelerometer.x, 2) +
+          powf (pxSensorsData->accelerometer.z, 2)
+      ), 1, pfYaw);
     }
 }
 
 /**
  * @brief Compute global orientation with a new entry
  *
- * @param dof_data New entry
+ * @param pxSensorsData New entry
  */
-jointures_state
-movement_analysis (arm_6dof_instance_f32 *dof_data, jointures jointure)
+JointState_t eMovementAnalysis (SensorsData_t *const pxSensorsData,
+                                const Joint_t eJoint)
 {
-  complementary_filter (dof_data, &ORIENTATION.pitch, &ORIENTATION.roll, &ORIENTATION.yaw);
-  jointures_state s_pitch = check_jointure_angle (ORIENTATION.pitch, jointure);
-  jointures_state s_roll = check_jointure_angle (ORIENTATION.roll, jointure);
-  jointures_state s_yaw = check_jointure_angle (ORIENTATION.yaw, jointure);
-  uint16_t state_value = s_pitch + s_roll + s_yaw;
+  prvComplementaryFilter (pxSensorsData,
+                          &xRotation.pitch,
+                          &xRotation.roll,
+                          &xRotation.yaw);
 
-  return state_value >= RISK ? RISK : state_value;
+  JointState_t eRollState = eCheckJointAngle (xRotation.roll, eJoint);
+  JointState_t ePitchState = eCheckJointAngle (xRotation.pitch, eJoint);
+  JointState_t eYawState = eCheckJointAngle (xRotation.yaw, eJoint);
+
+  uint16_t usRotationState = ePitchState + eRollState + eYawState;
+
+  return usRotationState > WARNING ? RISK : usRotationState;
 }
